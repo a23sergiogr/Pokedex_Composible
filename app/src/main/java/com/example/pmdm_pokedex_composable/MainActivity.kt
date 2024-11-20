@@ -55,7 +55,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             PMDM_Pokedex_ComposableTheme {
                 val navController = rememberNavController()
-
                 Scaffold(
                     topBar = {
                         DrawerExample(navController)
