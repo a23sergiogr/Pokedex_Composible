@@ -45,6 +45,7 @@ dependencies {
     implementation ("androidx.compose.ui:ui:1.5.0")
     implementation ("androidx.compose.material:material:1.5.0")
     implementation ("androidx.navigation:navigation-compose:2.5.3")
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.31.0-alpha")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

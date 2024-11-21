@@ -22,3 +22,14 @@ enum class PokemonType(val color: Color) {
     STEEL(Color(0xFFB8B8D0)),     // Color para el tipo ACERO
     FAIRY(Color(0xFFF0A0F0));     // Color para el tipo HADA
 }
+
+
+fun BlendColors(color1: Color, color2: Color): Color {
+    // Promediamos los valores de los componentes RGB y A
+    return Color(
+        red = (color1.red + color2.red) / 2,
+        green = (color1.green + color2.green) / 2,
+        blue = (color1.blue + color2.blue) / 2,
+        alpha = (color1.alpha + color2.alpha) / 2 // Promediamos la transparencia (alpha)
+    )
+}
