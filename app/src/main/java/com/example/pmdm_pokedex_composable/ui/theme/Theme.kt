@@ -12,26 +12,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = Purple80,        // Color principal
+    secondary = DeepPurple,    // Acento morado profundo
+    tertiary = Pink80,         // Acento rosado
+    background = DarkGrey,     // Fondo oscuro
+    surface = PurpleGrey80,    // Superficies ligeramente elevadas
+    onPrimary = LightGrey,     // Texto sobre elementos principales
+    onSecondary = WineRed,     // Elementos destacados en rojo vino
+    onBackground = LightGrey   // Texto en fondos
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primary = Purple40,        // Color principal
+    secondary = DeepPurple,    // Acento morado profundo
+    tertiary = Pink40,         // Acento rosado
+    background = LightGrey,    // Fondo claro
+    surface = PurpleGrey40,    // Superficies ligeramente elevadas
+    onPrimary = DarkGrey,      // Texto sobre elementos principales
+    onSecondary = WineRed,     // Elementos destacados en rojo vino
+    onBackground = DarkGrey    // Texto en fondos
 )
+
 
 @Composable
 fun PMDM_Pokedex_ComposableTheme(
