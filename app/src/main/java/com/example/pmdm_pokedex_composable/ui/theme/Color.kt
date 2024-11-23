@@ -19,4 +19,3 @@ val WineRed = Color(0xFF880E4F)     // Rojo vino para alertas o decorativos
 // Neutros
 val LightGrey = Color(0xFFF5F5F5)   // Gris claro para fondos
 val DarkGrey = Color(0xFF424242)    // Gris oscuro para texto o iconos
-
