@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pmdm_pokedex_composable.ui.theme.PMDM_Pokedex_ComposableTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
@@ -157,7 +158,6 @@ fun topView(
         ) {
             ImageSlider(
                 listOf(painterResource(R.drawable.bulbasaur),painterResource(R.drawable.type_poison), painterResource(R.drawable.type_grass)),
-                primaryColor
             )
         }
     }
@@ -165,8 +165,7 @@ fun topView(
 
 @Composable
 fun ImageSlider(
-    images: List<Painter>,
-    primaryColor: Color
+    images: List<Painter>
 ) {
     val pagerState = rememberPagerState()
 
@@ -176,43 +175,148 @@ fun ImageSlider(
             state = pagerState,
             modifier = Modifier.fillMaxSize()
         ) { page ->
-            Column {
-                ElevatedCard(
-                    elevation = CardDefaults.cardElevation(
-                        defaultElevation = 6.dp
-                    ),
+            Image(
+                painter = images[page],
+                contentDescription = "Image ${page + 1}",
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxHeight()
+            )
+        }
+    }
+}
+
+@Composable
+fun InfoSlider(
+    view: List<@Composable () -> Unit>
+) {
+    val pagerState = rememberPagerState()
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+        ) {
+            repeat(view.size) { index ->
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(300.dp)
-                        .padding(0.dp, 120.dp, 0.dp, 0.dp),
-                    colors = CardDefaults.elevatedCardColors(
-                        containerColor = primaryColor
-                    )
-                ) {
-                    Image(
-                        painter = images[page],
-                        contentDescription = "Image ${page + 1}",
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .fillMaxHeight()
-                    )
-                }
+                        .size(8.dp)
+                        .padding(4.dp)
+                        .background(
+                            color = if (pagerState.currentPage == index) Color.Black else Color.Gray,
+                            shape = CircleShape
+                        )
+                )
             }
         }
 
-        Row(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(16.dp)
-        ) {
-            repeat(images.size) { index ->
-                val selected = pagerState.currentPage == index
-                Box(
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .size(if (selected) 12.dp else 8.dp)
-                        .background(if (selected) Color.White else Color.Gray, CircleShape)
+        Box(modifier = Modifier.weight(1f)) {
+            HorizontalPager(
+                count = view.size,
+                state = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { page ->
+                view[page]()
+            }
+        }
+    }
+}
+
+@Composable
+fun BasicInfo(weight: String, height: String, evolutions: List<Painter>){
+    Column (
+        modifier = Modifier.background(MaterialTheme.colorScheme.primary)
+    ){
+        Text(
+            color = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier.padding(12.dp),
+            text = "Descripción",
+        )
+        Text(
+            color = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier.padding(12.dp),
+            text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur volutpat venenatis quam non ullamcorper. Nulla facilisi. Vivamus lacinia mauris non consequat sagittis. "
+        )
+        ElevatedCard (
+            modifier = Modifier.padding(12.dp),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.secondary
+            )
+        )
+        {
+            Row {
+                Text(
+                    color = MaterialTheme.colorScheme.onSecondary,
+                    modifier = Modifier.padding(12.dp),
+                    text = "Weight $weight"
                 )
+                Image(
+                    painter = painterResource(R.drawable.weight),
+                    contentDescription = "weight",
+                    modifier = Modifier
+                        .padding(16.dp,12.dp)
+                        .height(24.dp)
+                )
+            }
+        }
+        ElevatedCard (
+            modifier = Modifier.padding(12.dp),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.secondary
+            )
+        )
+        {
+            Row {
+                Text(
+                    color = MaterialTheme.colorScheme.onSecondary,
+                    modifier = Modifier.padding(12.dp),
+                    text = "Height $height"
+                )
+                Image(
+                    painter = painterResource(R.drawable.height),
+                    contentDescription = "height",
+                    modifier = Modifier
+                        .padding(16.dp,12.dp)
+                        .height(24.dp)
+                )
+            }
+        }
+        ElevatedCard(
+            modifier = Modifier
+                .padding(12.dp)
+                .fillMaxWidth(),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.secondary
+            )
+        ) {
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center // Alinea los elementos horizontalmente en el centro
+            ) {
+                items(evolutions.size) { i ->
+                    Column(
+                        modifier = Modifier.padding(8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally // Alinea el contenido dentro de cada columna al centro
+                    ) {
+                        Image(
+                            painter = evolutions[i],
+                            contentDescription = "Evolution",
+                            modifier = Modifier
+                                .padding(12.dp)
+                                .height(52.dp)
+                        )
+                        Text(
+                            text = "[nombrePokemon?]",
+                            modifier = Modifier.padding(top = 4.dp),
+                            fontSize = 12.sp
+                        )
+                    }
+                }
             }
         }
     }
@@ -224,12 +328,19 @@ fun ImageSlider(
 @Composable
 fun Preview() {
     PMDM_Pokedex_ComposableTheme {
-        topView(
-            name = "Bulbasaur",
-            id = "#$001",
-            pokemonImage = painterResource(R.drawable.bulbasaur),
-            imgType01 = painterResource(R.drawable.type_grass),
-            imgType02 = painterResource(R.drawable.type_poison)
-        )
+//        topView(
+//            name = "Bulbasaur",
+//            id = "#$001",
+//            pokemonImage = painterResource(R.drawable.bulbasaur),
+//            imgType01 = painterResource(R.drawable.type_grass),
+//            imgType02 = painterResource(R.drawable.type_poison)
+//        )
+        BasicInfo(
+            "123",
+            "321",
+            listOf(
+                painterResource(R.drawable.bulbasaur),
+                painterResource(R.drawable.bulbasaur),
+                painterResource(R.drawable.bulbasaur)))
     }
 }
