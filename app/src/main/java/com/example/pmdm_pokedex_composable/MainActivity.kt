@@ -1,7 +1,5 @@
 package com.example.pmdm_pokedex_composable
 
-import android.annotation.SuppressLint
-import android.media.Image
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -19,24 +17,25 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.DrawerState
 import androidx.compose.material.DrawerValue
+import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.ModalDrawer
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.rememberDrawerState
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -48,12 +47,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -70,7 +69,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             PMDM_Pokedex_ComposableTheme {
-                mainPanel()
+                MainPanel()
             }
         }
     }
@@ -80,13 +79,43 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun GreetingPreview() {
     PMDM_Pokedex_ComposableTheme {
-        //DrawerExample(navController = rememberNavController())
-        cardListTest()
+        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+        val scope = rememberCoroutineScope()
+
+        ModalDrawer(
+            drawerState = drawerState,
+            drawerContent = {
+                //DrawerContent()
+            }
+        ) {
+            Scaffold(
+                floatingActionButtonPosition = FabPosition.End,
+                floatingActionButton = {
+                    FloatingActionButton(
+                        onClick = {
+                            scope.launch {
+                                if (drawerState.isClosed) {
+                                    drawerState.open()
+                                } else {
+                                    drawerState.close()
+                                }
+                            }
+                        }
+                    ) {
+                        Icon(Icons.Default.Menu, contentDescription = "Open menu")
+                    }
+                }
+            ) { paddingValues ->
+                Box(modifier = Modifier.padding(paddingValues)) {
+                    CardList()
+                }
+            }
+        }
     }
 }
 
 @Composable
-fun mainPanel() {
+fun MainPanel() {
     val systemUiController = rememberSystemUiController()
 
     // Determina si el color de fondo (background) es claro u oscuro
@@ -105,244 +134,152 @@ fun mainPanel() {
         darkIcons = isNavBarLight // Iconos oscuros si el fondo es claro
     )
 
-    // Contenido principal
+    val navController = rememberNavController()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .systemBarsPadding() // Maneja automáticamente las barras de sistema
+            .systemBarsPadding(),
     ) {
-        cardListTest()
+        LateralMenu(
+            navController = navController,
+            content = {
+                NavHost(
+                    navController = navController,
+                    startDestination = "Pokedex"
+                ) {
+                    composable("Pokedex") { CardList() }
+
+                    composable("MoveDex") { MoveDex() }
+                }
+            }
+        )
     }
 }
 
-
-/**
- * Diseño Ejemplo de una targeta con la
- * infórmación más básica de un Pokemon
- */
 @Composable
-fun ElevatedCardExample() {
-    ElevatedCard(
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 6.dp
-        ),
-        modifier = Modifier
-            .size(width = 240.dp, height = 100.dp)
-            .padding(8.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .weight(1f)
-                    .padding(8.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Bulbasaur",
-                        modifier = Modifier
-                            .padding(0.dp, 0.dp, 2.dp, 0.dp),
-                        fontSize = 10.sp,
-                        textAlign = TextAlign.Center,
-                    )
-                    Text(
-                        text = "#0001",
-                        modifier = Modifier
-                            .padding(0.dp, 0.dp, 2.dp, 0.dp),
-                        fontSize = 10.sp,
-                        textAlign = TextAlign.Center,
-                    )
-                    Image(
-                        painter = painterResource(R.drawable.stars_shiny),
-                        contentDescription = "stars",
-                        modifier = Modifier.width(12.dp)
-                    )
-                }
+fun LateralMenu(
+    navController: NavController,
+    content: @Composable () -> Unit
+){
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 4.dp),
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically
+
+    ModalDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            DrawerContent(navController, drawerState)
+        }
+    ) {
+        Scaffold(
+            floatingActionButtonPosition = FabPosition.End,
+            floatingActionButton = {
+                FloatingActionButton(
+                    backgroundColor = MaterialTheme.colorScheme.tertiary,
+                    onClick = {
+                        scope.launch {
+                            if (drawerState.isClosed) {
+                                drawerState.open()
+                            } else {
+                                drawerState.close()
+                            }
+                        }
+                    }
                 ) {
-                    Image(
-                        painter = painterResource(R.drawable.type_grass),
-                        contentDescription = "type_grass",
-                        modifier = Modifier
-                            .padding(0.dp, 0.dp, 2.dp, 0.dp)
-                            .size(50.dp)
-                    )
-                    Image(
-                        painter = painterResource(R.drawable.type_poison),
-                        contentDescription = "type_poison",
-                        modifier = Modifier
-                            .padding(0.dp, 0.dp, 2.dp, 0.dp)
-                            .size(50.dp)
-                    )
+                    Icon(Icons.Default.Menu, contentDescription = "Open menu")
                 }
             }
-
-            Image(
-                painter = painterResource(R.drawable.bulbasaur),
-                contentDescription = "bulbasaur",
-                modifier = Modifier
-                    .padding(8.dp)
-                    .fillMaxHeight()
-            )
+        ) { paddingValues ->
+            Box(modifier = Modifier.padding(paddingValues)) {
+                content()
+            }
         }
     }
 }
 
 @Composable
-fun PokedexCard(
-    name: String,
-    id: String,
-    pokemonImage: Painter,
-    imgType01: Painter,
-    imgType02: Painter?
+fun DrawerContent(
+    navController: NavController,
+    drawerState: DrawerState
 ) {
-    // Obtén los colores del tema actual
-    val textColor = MaterialTheme.colorScheme.onPrimary
-    val primaryColor = MaterialTheme.colorScheme.primary
 
-    ElevatedCard(
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 6.dp
+    val coroutineScope = rememberCoroutineScope()
+
+    Column(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.Start
+    ) {
+        Text(
+            text = "Menú",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        NavigationButton(
+            text = "Pokedex",
+            icon = Icons.Default.Menu,
+            onClick = {
+                navController.navigate("Pokedex")
+                coroutineScope.launch {
+                    drawerState.close() // Cierra el menú
+                }
+            }
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        NavigationButton(
+            text = "Movedex",
+            icon = Icons.Default.Menu,
+            onClick = {
+                navController.navigate("Movedex")
+                coroutineScope.launch {
+                    drawerState.close() // Cierra el menú
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun NavigationButton(
+    text: String,
+    icon: ImageVector,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .height(120.dp)
-            .padding(8.dp),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = primaryColor // Aplicar el color de fondo del tema
-        )
+            .height(56.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.Center
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .weight(1f)
-                    .padding(8.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = name,
-                        modifier = Modifier
-                            .padding(0.dp, 0.dp, 2.dp, 0.dp),
-                        fontSize = 16.sp,
-                        textAlign = TextAlign.Center,
-                        color = textColor // Usar color primario del tema
-                    )
-                    Text(
-                        text = id,
-                        modifier = Modifier
-                            .padding(0.dp, 0.dp, 2.dp, 0.dp),
-                        fontSize = 16.sp,
-                        textAlign = TextAlign.Center,
-                        color = textColor // Usar color secundario del tema para el ID
-                    )
-                    Image(
-                        painter = painterResource(R.drawable.stars_shiny),
-                        contentDescription = "stars",
-                        modifier = Modifier.width(24.dp)
-                    )
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 4.dp),
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Image(
-                        painter = imgType01,
-                        contentDescription = "type01",
-                        modifier = Modifier
-                            .padding(0.dp, 0.dp, 10.dp, 0.dp)
-                            .size(80.dp)
-                    )
-                    if (imgType02 != null) {
-                        Image(
-                            painter = imgType02,
-                            contentDescription = "type02",
-                            modifier = Modifier
-                                .padding(0.dp, 0.dp, 10.dp, 0.dp)
-                                .size(80.dp)
-                        )
-                    }
-                }
-            }
-
-            Image(
-                painter = pokemonImage,
-                contentDescription = name,
-                modifier = Modifier
-                    .padding(8.dp)
-                    .fillMaxHeight()
+            Icon(
+                imageVector = icon,
+                contentDescription = text,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = text,
+                fontSize = 18.sp
             )
         }
     }
 }
 
 
-
-@Composable
-fun cardListTest(){
-    LazyColumn (
-        Modifier.background(MaterialTheme.colorScheme.background)
-    ){
-        items(1000) { i ->
-            PokedexCard(
-                name = "Bulbasaur",
-                id = "#$i",
-                pokemonImage = painterResource(R.drawable.bulbasaur),
-                imgType01 = painterResource(R.drawable.type_grass),
-                imgType02 = painterResource(R.drawable.type_poison)
-            )
-        }
-    }
-}
-
-//Código de prueba sin uso aparente
-
-/**
- *
- * //                val navController = rememberNavController()
- * //                Scaffold(
- * //                    topBar = {
- * //                        DrawerExample(navController)
- * //                    }
- * //                ) { innerPadding ->
- * //                    Greeting(
- * //                        name = "Android",
- * //                        modifier = Modifier.padding(innerPadding)
- * //                    )
- * //                }
- */
 @Composable
 fun CustomTopNavigationBar(navController: NavController) {
     Row(
