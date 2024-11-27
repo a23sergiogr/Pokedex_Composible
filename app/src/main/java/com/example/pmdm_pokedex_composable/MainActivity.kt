@@ -42,17 +42,20 @@ import androidx.compose.material.Button
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.ButtonDefaults
 //noinspection UsingMaterialAndMaterial3Libraries
-import androidx.compose.material.DrawerState
 //noinspection UsingMaterialAndMaterial3Libraries
-import androidx.compose.material.DrawerValue
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.FloatingActionButton
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Icon
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.HorizontalDivider
 //noinspection UsingMaterialAndMaterial3Libraries
-import androidx.compose.material.ModalDrawer
-//noinspection UsingMaterialAndMaterial3Libraries
-import androidx.compose.material.rememberDrawerState
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.ui.tooling.preview.Preview
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,44 +69,13 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun GreetingPreview() {
-//    PMDM_Pokedex_ComposableTheme {
-//        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-//        val scope = rememberCoroutineScope()
-//
-//        ModalDrawer(
-//            drawerState = drawerState,
-//            drawerContent = {
-//                //DrawerContent()
-//            }
-//        ) {
-//            Scaffold(
-//                floatingActionButtonPosition = FabPosition.End,
-//                floatingActionButton = {
-//                    FloatingActionButton(
-//                        onClick = {
-//                            scope.launch {
-//                                if (drawerState.isClosed) {
-//                                    drawerState.open()
-//                                } else {
-//                                    drawerState.close()
-//                                }
-//                            }
-//                        }
-//                    ) {
-//                        Icon(Icons.Default.Menu, contentDescription = "Open menu")
-//                    }
-//                }
-//            ) { paddingValues ->
-//                Box(modifier = Modifier.padding(paddingValues)) {
-//                    CardList()
-//                }
-//            }
-//        }
-//    }
-//}
+@Preview(showBackground = true)
+@Composable
+fun GreetingPreview() {
+    PMDM_Pokedex_ComposableTheme {
+        MainPanel()
+    }
+}
 
 @Composable
 fun MainPanel() {
@@ -148,45 +120,84 @@ fun MainPanel() {
     }
 }
 
+
 @Composable
 fun LateralMenu(
     navController: NavController,
     content: @Composable () -> Unit
 ){
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val coroutineScope = rememberCoroutineScope()
     val scope = rememberCoroutineScope()
 
 
-    ModalDrawer(
+    ModalNavigationDrawer(
         drawerState = drawerState,
-        drawerContent = {
-            DrawerContent(navController, drawerState)
-        }
-    ) {
-        Scaffold(
-            floatingActionButtonPosition = FabPosition.End,
-            floatingActionButton = {
-                FloatingActionButton(
-                    backgroundColor = MaterialTheme.colorScheme.tertiary,
-                    onClick = {
-                        scope.launch {
-                            if (drawerState.isClosed) {
-                                drawerState.open()
-                            } else {
-                                drawerState.close()
-                            }
-                        }
+        drawerContent = { ModalDrawerSheet() {
+            NavigationDrawerItem(
+                label = { Text(text = "Pokedex") },
+                selected = false,
+                onClick = {
+                    navController.navigate("Pokedex")
+                    coroutineScope.launch {
+                        drawerState.close()
                     }
-                ) {
-                    Icon(Icons.Default.Menu, contentDescription = "Open menu")
-                }
-            }
-        ) { paddingValues ->
-            Box(modifier = Modifier.padding(paddingValues)) {
-                content()
-            }
-        }
+                },
+                modifier = Modifier.padding(6.dp),
+            )
+            NavigationDrawerItem(
+                label = { Text(text = "Movedex") },
+                selected = false,
+                onClick = {
+                    navController.navigate("Movedex")
+                    coroutineScope.launch {
+                        drawerState.close()
+                    }
+                },
+                modifier = Modifier.padding(6.dp),
+            )
+            HorizontalDivider(modifier = Modifier.padding(6.dp))
+            NavigationDrawerItem(
+                label = { Text(text = "Settings") },
+                selected = false,
+                onClick = {},
+                modifier = Modifier.padding(6.dp),
+            )
+        } }
+    ) {
+        content()
     }
+
+//    ModalDrawer(
+//        drawerState = drawerState,
+//        drawerContent = {
+//            DrawerContent(navController, drawerState)
+//        }
+//    ) {
+//        Scaffold(
+//            floatingActionButtonPosition = FabPosition.End,
+//            floatingActionButton = {
+//                FloatingActionButton(
+//                    backgroundColor = MaterialTheme.colorScheme.tertiary,
+//                    onClick = {
+//                        scope.launch {
+//                            if (drawerState.isClosed) {
+//                                drawerState.open()
+//                            } else {
+//                                drawerState.close()
+//                            }
+//                        }
+//                    }
+//                ) {
+//                    Icon(Icons.Default.Menu, contentDescription = "Open menu")
+//                }
+//            }
+//        ) { paddingValues ->
+//            Box(modifier = Modifier.padding(paddingValues)) {
+//                content()
+//            }
+//        }
+//    }
 }
 
 @Composable
