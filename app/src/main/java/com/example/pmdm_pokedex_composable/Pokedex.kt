@@ -25,6 +25,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 
 
 @Composable
@@ -36,7 +39,14 @@ fun Pokedex(){
  * Renderiza una lista de tarjetas (`PokedexCard`) en una columna perezosa (`LazyColumn`).
  */
 @Composable
-fun CardList(){
+fun CardList(navController: NavHostController){
+    NavHost(
+        navController = navController,
+        startDestination = "Pokedex"
+    ) {
+        composable("PokemonView") { PokemonView() }
+    }
+
     LazyColumn (
         Modifier.background(MaterialTheme.colorScheme.background)
     ){
@@ -46,7 +56,8 @@ fun CardList(){
                 id = "#$i",
                 pokemonImage = painterResource(R.drawable.bulbasaur),
                 imgType01 = painterResource(R.drawable.type_grass),
-                imgType02 = painterResource(R.drawable.type_poison)
+                imgType02 = painterResource(R.drawable.type_poison),
+                onClick = { navController.navigate("PokemonView")}
             )
         }
     }
@@ -68,13 +79,15 @@ fun PokedexCard(
     id: String,
     pokemonImage: Painter,
     imgType01: Painter,
-    imgType02: Painter?
+    imgType02: Painter?,
+    onClick: @Composable () -> Unit
 ) {
     // Obtén los colores del tema actual
     val textColor = MaterialTheme.colorScheme.onPrimary
     val primaryColor = MaterialTheme.colorScheme.primary
 
     ElevatedCard(
+        onClick = {onClick},
         elevation = CardDefaults.cardElevation(
             defaultElevation = 6.dp
         ),
