@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+<<<<<<< HEAD:app/src/main/java/com/example/pmdm_pokedex_composable/view/Pokedex.kt
 import coil.compose.rememberImagePainter
 import com.example.pmdm_pokedex_composable.R
 import com.example.pmdm_pokedex_composable.model.data_classes.PokeApiService
@@ -47,6 +48,10 @@ import com.example.pmdm_pokedex_composable.model.data_classes.Pokemon
 import com.example.pmdm_pokedex_composable.model.data_classes.Sprites
 import com.example.pmdm_pokedex_composable.model.data_classes.pokeApiService
 
+=======
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+>>>>>>> ae1e30742ccb2c7e31f4262103dac852f27b663b:app/src/main/java/com/example/pmdm_pokedex_composable/Pokedex.kt
 
 
 @Composable
@@ -101,6 +106,7 @@ fun Pokedex(
  * Renderiza una lista de tarjetas (`PokedexCard`) en una columna perezosa (`LazyColumn`).
  */
 @Composable
+<<<<<<< HEAD:app/src/main/java/com/example/pmdm_pokedex_composable/view/Pokedex.kt
 fun CardListPokedex(
     navController: NavHostController,
     pokemonEntries: List<Pokedex.PokemonEntries>,
@@ -139,6 +145,28 @@ fun CardListPokedex(
                     onClick = { navController.navigate("PokemonView") }
                 )
             }
+=======
+fun CardList(navController: NavHostController){
+    NavHost(
+        navController = navController,
+        startDestination = "Pokedex"
+    ) {
+        composable("PokemonView") { PokemonView() }
+    }
+
+    LazyColumn (
+        Modifier.background(MaterialTheme.colorScheme.background)
+    ){
+        items(100) { i ->
+            PokedexCard(
+                name = "Bulbasaur",
+                id = "#$i",
+                pokemonImage = painterResource(R.drawable.bulbasaur),
+                imgType01 = painterResource(R.drawable.type_grass),
+                imgType02 = painterResource(R.drawable.type_poison),
+                onClick = { navController.navigate("PokemonView")}
+            )
+>>>>>>> ae1e30742ccb2c7e31f4262103dac852f27b663b:app/src/main/java/com/example/pmdm_pokedex_composable/Pokedex.kt
         }
     }
 }
