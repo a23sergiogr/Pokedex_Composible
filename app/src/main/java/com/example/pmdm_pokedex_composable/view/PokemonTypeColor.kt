@@ -1,4 +1,4 @@
-package com.example.pmdm_pokedex_composable
+package com.example.pmdm_pokedex_composable.view
 
 import androidx.compose.ui.graphics.Color
 

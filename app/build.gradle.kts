@@ -41,11 +41,15 @@ android {
 
 dependencies {
 
+    implementation ("io.coil-kt:coil-compose:2.4.0")
     implementation ("androidx.compose.ui:ui:1.5.0")
     implementation ("androidx.compose.material:material:1.5.0")
     implementation ("androidx.navigation:navigation-compose:2.5.3")
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.31.0-alpha")
     implementation ("com.google.accompanist:accompanist-pager:0.32.0")
+    implementation ("com.google.code.gson:gson:2.10.1")
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

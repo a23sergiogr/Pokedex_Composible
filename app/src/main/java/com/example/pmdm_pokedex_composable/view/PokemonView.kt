@@ -1,4 +1,4 @@
-package com.example.pmdm_pokedex_composable
+package com.example.pmdm_pokedex_composable.view
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -31,9 +31,13 @@ import com.example.pmdm_pokedex_composable.ui.theme.PMDM_Pokedex_ComposableTheme
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+<<<<<<< HEAD:app/src/main/java/com/example/pmdm_pokedex_composable/view/PokemonView.kt
+import com.example.pmdm_pokedex_composable.R
+=======
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.rememberCoroutineScope
+>>>>>>> ae1e30742ccb2c7e31f4262103dac852f27b663b:app/src/main/java/com/example/pmdm_pokedex_composable/PokemonView.kt
 import com.google.accompanist.pager.*
 import kotlinx.coroutines.launch
 
@@ -168,7 +172,34 @@ fun TopView(
                         contentDescription = "stars",
                         modifier = Modifier
                             .width(28.dp)
+<<<<<<< HEAD:app/src/main/java/com/example/pmdm_pokedex_composable/view/PokemonView.kt
+                            .padding(5.dp, 0.dp, 0.dp, 0.dp)
+                    )
+                }
+
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
+            ) {
+                ElevatedCard(
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = 6.dp
+                    ),
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    colors = CardDefaults.elevatedCardColors(
+                        containerColor = primaryColor
+                    )
+                ) {
+                    ImageSlider(
+                        listOf(painterResource(R.drawable.bulbasaur),painterResource(R.drawable.type_poison), painterResource(
+                            R.drawable.type_grass
+                        )),
+=======
                             .padding(start = 5.dp)
+>>>>>>> ae1e30742ccb2c7e31f4262103dac852f27b663b:app/src/main/java/com/example/pmdm_pokedex_composable/PokemonView.kt
                     )
                 }
             }
