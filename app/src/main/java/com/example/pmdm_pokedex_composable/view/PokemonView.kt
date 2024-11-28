@@ -1,4 +1,4 @@
-package com.example.pmdm_pokedex_composable
+package com.example.pmdm_pokedex_composable.view
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import com.example.pmdm_pokedex_composable.ui.theme.PMDM_Pokedex_ComposableTheme
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
+import com.example.pmdm_pokedex_composable.R
 import com.google.accompanist.pager.*
 
 
@@ -151,7 +152,9 @@ fun TopView(
                     )
                 ) {
                     ImageSlider(
-                        listOf(painterResource(R.drawable.bulbasaur),painterResource(R.drawable.type_poison), painterResource(R.drawable.type_grass)),
+                        listOf(painterResource(R.drawable.bulbasaur),painterResource(R.drawable.type_poison), painterResource(
+                            R.drawable.type_grass
+                        )),
                     )
                 }
             }

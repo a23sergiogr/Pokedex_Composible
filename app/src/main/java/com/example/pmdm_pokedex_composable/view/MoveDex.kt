@@ -1,4 +1,4 @@
-package com.example.pmdm_pokedex_composable
+package com.example.pmdm_pokedex_composable.view
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -15,13 +15,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
-import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
@@ -35,26 +39,45 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.pmdm_pokedex_composable.R
 import com.example.pmdm_pokedex_composable.ui.theme.PMDM_Pokedex_ComposableTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
-fun MoveDex(){
-    BottomSheetMoveDex {
-        Moves(
-            MaterialTheme.colorScheme.background,
-            0xFF95c799,
-            painterResource(R.drawable.type_grass),
-            "Gigadrenado",
-            "special",
-            "75",
-            "100",
-            "15",
-            "0",
-            "Steals 1/2 of the damage inflicted",
-            "Inflicts regular damage. Drains half the damage inflicted to heal the user"
-        )
+fun MoveDex(
+    drawerState: DrawerState,
+    ){
+    Scaffold(
+        topBar = {
+            TopBar(
+                drawerState = drawerState,
+                title = "MoveDex",
+                actions = {
+                    IconButton(onClick = { /* Acción de filtrar */ }) {
+                        Icons.Default.Add
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
+        Box(modifier = Modifier.padding(innerPadding)) {
+            BottomSheetMoveDex {
+                Moves(
+                    MaterialTheme.colorScheme.background,
+                    0xFF95c799,
+                    painterResource(R.drawable.type_grass),
+                    "Gigadrenado",
+                    "special",
+                    "75",
+                    "100",
+                    "15",
+                    "0",
+                    "Steals 1/2 of the damage inflicted",
+                    "Inflicts regular damage. Drains half the damage inflicted to heal the user"
+                )
+            }
+        }
     }
 }
 

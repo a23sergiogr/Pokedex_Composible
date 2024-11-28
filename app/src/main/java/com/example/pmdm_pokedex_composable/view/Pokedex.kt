@@ -1,8 +1,9 @@
-package com.example.pmdm_pokedex_composable
+package com.example.pmdm_pokedex_composable.view
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -13,11 +14,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
@@ -25,29 +38,107 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import coil.compose.rememberImagePainter
+import com.example.pmdm_pokedex_composable.R
+import com.example.pmdm_pokedex_composable.model.data_classes.PokeApiService
+import com.example.pmdm_pokedex_composable.model.data_classes.Pokedex
+import com.example.pmdm_pokedex_composable.model.data_classes.Pokemon
+import com.example.pmdm_pokedex_composable.model.data_classes.Sprites
+import com.example.pmdm_pokedex_composable.model.data_classes.pokeApiService
+
 
 
 @Composable
-fun Pokedex(){
+fun Pokedex(
+    drawerState: DrawerState,
+    navController: NavHostController
+) {
+    // Estado para almacenar la lista de Pokémon
+    val pokemonEntries = remember { mutableStateOf<List<Pokedex.PokemonEntries>>(emptyList()) }
+    val loading = remember { mutableStateOf(true) }
 
+    // LaunchedEffect para hacer la solicitud a la API
+    LaunchedEffect(Unit) {
+        try {
+            // Aquí puedes cambiar el ID de Pokedex si es necesario
+            val pokedex = pokeApiService.getPokedex(1)
+            pokemonEntries.value = pokedex.pokemonEntries
+            loading.value = false
+        } catch (e: Exception) {
+            println("Error al obtener datos: ${e.message}")
+            loading.value = false
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopBar(
+                drawerState = drawerState,
+                title = "Pokedex",
+                actions = {
+                    IconButton(onClick = { /* Acción de filtrar */ }) {
+                        Icons.Default.Add
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
+        Box(modifier = Modifier.padding(innerPadding)) {
+            // Verifica si los datos están cargando
+            if (loading.value) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            } else {
+                // Pasa los pokemonEntries deserializados a CardListPokedex
+                CardListPokedex(navController, pokemonEntries.value, pokeApiService)
+            }
+        }
+    }
 }
+
 
 /**
  * Renderiza una lista de tarjetas (`PokedexCard`) en una columna perezosa (`LazyColumn`).
  */
 @Composable
-fun CardList(){
-    LazyColumn (
-        Modifier.background(MaterialTheme.colorScheme.background)
-    ){
-        items(100) { i ->
-            PokedexCard(
-                name = "Bulbasaur",
-                id = "#$i",
-                pokemonImage = painterResource(R.drawable.bulbasaur),
-                imgType01 = painterResource(R.drawable.type_grass),
-                imgType02 = painterResource(R.drawable.type_poison)
-            )
+fun CardListPokedex(
+    navController: NavHostController,
+    pokemonEntries: List<Pokedex.PokemonEntries>,
+    pokeApiService: PokeApiService
+) {
+    LazyColumn(Modifier.background(MaterialTheme.colorScheme.background)) {
+        items(pokemonEntries) { entry ->
+            // Estado para el Pokémon actual
+            val loading = remember { mutableStateOf(true) }
+            val pokemon = remember { mutableStateOf<Pokemon?>(null) }
+
+            // Realiza la solicitud solo si el Pokémon aún no se ha cargado
+            LaunchedEffect(entry.pokemonSpecies.name) {
+                try {
+                    val pokemonData = pokeApiService.getPokemon(entry.pokemonSpecies.name)
+                    pokemon.value = pokemonData
+                    loading.value = false
+                } catch (e: Exception) {
+                    println("Error al obtener datos: ${e.message}")
+                    loading.value = false
+                }
+            }
+
+            if (loading.value) {
+                CircularProgressIndicator()
+            } else {
+                val sprites = pokemon.value?.sprites
+                val pokemonImage = sprites?.normalSprites?.get(0)
+
+                PokedexCard(
+                    name = entry.pokemonSpecies.name,
+                    id = pokemon.value?.id.toString(),
+                    pokemonImage = (pokemonImage ?: painterResource(R.drawable.bulbasaur)).toString(), // Imagen por defecto en caso de error
+                    imgType01 = painterResource(R.drawable.type_grass),
+                    imgType02 = painterResource(R.drawable.type_poison),
+                    onClick = { navController.navigate("PokemonView") }
+                )
+            }
         }
     }
 }
@@ -66,15 +157,27 @@ fun CardList(){
 fun PokedexCard(
     name: String,
     id: String,
-    pokemonImage: Painter,
+    pokemonImage: String,
     imgType01: Painter,
-    imgType02: Painter?
+    imgType02: Painter?,
+    onClick: @Composable () -> Unit
 ) {
     // Obtén los colores del tema actual
     val textColor = MaterialTheme.colorScheme.onPrimary
     val primaryColor = MaterialTheme.colorScheme.primary
 
+    val painter = rememberImagePainter(
+        pokemonImage,
+        builder = {
+            crossfade(true)
+            placeholder(R.drawable.placeholder_ditto)
+            error(R.drawable.error_unown_question_mark)
+        }
+    )
+
+
     ElevatedCard(
+        onClick = {onClick},
         elevation = CardDefaults.cardElevation(
             defaultElevation = 6.dp
         ),
@@ -83,7 +186,7 @@ fun PokedexCard(
             .height(120.dp)
             .padding(8.dp),
         colors = CardDefaults.elevatedCardColors(
-            containerColor = primaryColor // Aplicar el color de fondo del tema
+            containerColor = primaryColor
         )
     ) {
         Row(
@@ -155,10 +258,11 @@ fun PokedexCard(
             }
 
             Image(
-                painter = pokemonImage,
+                painter = painter,
                 contentDescription = name,
                 modifier = Modifier
                     .padding(8.dp)
+                    .size(80.dp)
                     .fillMaxHeight()
             )
         }
