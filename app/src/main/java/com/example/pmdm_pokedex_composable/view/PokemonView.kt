@@ -31,19 +31,23 @@ import com.example.pmdm_pokedex_composable.ui.theme.PMDM_Pokedex_ComposableTheme
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-<<<<<<< HEAD:app/src/main/java/com/example/pmdm_pokedex_composable/view/PokemonView.kt
-import com.example.pmdm_pokedex_composable.R
-=======
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.rememberCoroutineScope
->>>>>>> ae1e30742ccb2c7e31f4262103dac852f27b663b:app/src/main/java/com/example/pmdm_pokedex_composable/PokemonView.kt
+import com.example.pmdm_pokedex_composable.R
+import com.example.pmdm_pokedex_composable.model.data_classes.Pokemon
+import com.example.pmdm_pokedex_composable.model.data_classes.Species
+import com.example.pmdm_pokedex_composable.model.data_classes.Sprites
 import com.google.accompanist.pager.*
 import kotlinx.coroutines.launch
 
 
 @Composable
-fun PokemonView(){
+fun PokemonView(
+    pokemon: Pokemon,
+    species: Species,
+    sprites: Sprites
+){
     Column (
         modifier = Modifier
             .fillMaxSize()
@@ -93,6 +97,7 @@ fun TopView(
 ) {
     // Obtén los colores del tema actual
     val textColor = MaterialTheme.colorScheme.onPrimary
+    val primaryColor = MaterialTheme.colorScheme.primary
 
     Box(
         modifier = Modifier
@@ -172,7 +177,6 @@ fun TopView(
                         contentDescription = "stars",
                         modifier = Modifier
                             .width(28.dp)
-<<<<<<< HEAD:app/src/main/java/com/example/pmdm_pokedex_composable/view/PokemonView.kt
                             .padding(5.dp, 0.dp, 0.dp, 0.dp)
                     )
                 }
@@ -197,9 +201,6 @@ fun TopView(
                         listOf(painterResource(R.drawable.bulbasaur),painterResource(R.drawable.type_poison), painterResource(
                             R.drawable.type_grass
                         )),
-=======
-                            .padding(start = 5.dp)
->>>>>>> ae1e30742ccb2c7e31f4262103dac852f27b663b:app/src/main/java/com/example/pmdm_pokedex_composable/PokemonView.kt
                     )
                 }
             }

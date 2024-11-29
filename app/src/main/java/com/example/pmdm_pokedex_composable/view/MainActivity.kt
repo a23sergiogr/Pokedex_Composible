@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -37,12 +38,37 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBar
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.pmdm_pokedex_composable.R
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.semantics.*
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.runtime.saveable.rememberSaveable
+import com.example.pmdm_pokedex_composable.model.data_classes.pokeApiService
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -85,7 +111,6 @@ fun MainPanel() {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -102,7 +127,8 @@ fun MainPanel() {
                     composable("Pokedex") {
                         Pokedex(
                             drawerState = drawerState,
-                            navController = navController
+                            navController = navController,
+                            pokeApiService = pokeApiService
                         )
                     }
                     composable("MoveDex") {
@@ -111,7 +137,7 @@ fun MainPanel() {
                         )
                     }
                     composable("PokemonView") {
-                        PokemonView()
+                        //PokemonView()
                     }
                 }
             }
@@ -203,6 +229,57 @@ fun LateralMenu(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+fun SearchBarSample(
+    list: List<String>, // Lista sobre la que se hará la búsqueda
+    contentBelowSearchBar: @Composable () -> Unit // Contenido adicional debajo de la barra de búsqueda
+) {
+    val textFieldState = rememberTextFieldState()
+    val searchQuery = textFieldState.text
+
+    // Filtrar los resultados según el texto de búsqueda
+    val filteredList = list.filter { it.contains(searchQuery, ignoreCase = true) }
+
+    Box(Modifier.fillMaxSize()) {
+        // Barra de búsqueda siempre expandida
+        SearchBar(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth(),
+            inputField = {
+                SearchBarDefaults.InputField(
+                    state = textFieldState,
+                    onSearch = { },
+                    expanded = true, // Mantener expandida la barra
+                    onExpandedChange = { },
+                    placeholder = { Text("Search Pokémon") },
+                    leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                    trailingIcon = { Icon(Icons.Filled.MoreVert, contentDescription = null) },
+                )
+            },
+            expanded = true,
+            onExpandedChange = { }, // No se necesita acción de expansión
+            content = {
+//                // Mostrar los resultados filtrados debajo de la barra de búsqueda
+//                Column(Modifier.verticalScroll(rememberScrollState())) {
+//                    filteredList.forEach { item ->
+//                        Text(
+//                            text = item,
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .padding(16.dp)
+//                        )
+//                    }
+//                }
+
+                // Componente adicional debajo de la barra de búsqueda
+                contentBelowSearchBar()
+            }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun TopBar(
     title: String,
     drawerState: DrawerState,
@@ -232,11 +309,9 @@ fun TopBar(
         actions = {
             actions?.invoke()
         },
-        colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,
             titleContentColor = MaterialTheme.colorScheme.onPrimary
         )
     )
 }
-
-

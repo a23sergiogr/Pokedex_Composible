@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.example.pmdm_pokedex_composable"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.pmdm_pokedex_composable"
@@ -43,8 +43,9 @@ dependencies {
 
     implementation ("io.coil-kt:coil-compose:2.4.0")
     implementation ("androidx.compose.ui:ui:1.5.0")
-    implementation ("androidx.compose.material:material:1.5.0")
+    implementation ("androidx.compose.material3:material3:1.4.0-alpha02")
     implementation ("androidx.navigation:navigation-compose:2.5.3")
+    implementation ("androidx.compose.material:material-icons-extended:1.4.0")
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.31.0-alpha")
     implementation ("com.google.accompanist:accompanist-pager:0.32.0")
     implementation ("com.google.code.gson:gson:2.10.1")

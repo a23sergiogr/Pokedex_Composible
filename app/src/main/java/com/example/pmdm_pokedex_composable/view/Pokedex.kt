@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
@@ -39,7 +38,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-<<<<<<< HEAD:app/src/main/java/com/example/pmdm_pokedex_composable/view/Pokedex.kt
 import coil.compose.rememberImagePainter
 import com.example.pmdm_pokedex_composable.R
 import com.example.pmdm_pokedex_composable.model.data_classes.PokeApiService
@@ -47,27 +45,23 @@ import com.example.pmdm_pokedex_composable.model.data_classes.Pokedex
 import com.example.pmdm_pokedex_composable.model.data_classes.Pokemon
 import com.example.pmdm_pokedex_composable.model.data_classes.Sprites
 import com.example.pmdm_pokedex_composable.model.data_classes.pokeApiService
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.filled.Add
 
-=======
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
->>>>>>> ae1e30742ccb2c7e31f4262103dac852f27b663b:app/src/main/java/com/example/pmdm_pokedex_composable/Pokedex.kt
 
 
 @Composable
 fun Pokedex(
     drawerState: DrawerState,
-    navController: NavHostController
+    navController: NavHostController,
+    pokeApiService: PokeApiService
 ) {
-    // Estado para almacenar la lista de Pokémon
     val pokemonEntries = remember { mutableStateOf<List<Pokedex.PokemonEntries>>(emptyList()) }
     val loading = remember { mutableStateOf(true) }
 
-    // LaunchedEffect para hacer la solicitud a la API
     LaunchedEffect(Unit) {
         try {
-            // Aquí puedes cambiar el ID de Pokedex si es necesario
-            val pokedex = pokeApiService.getPokedex(1)
+            val pokedex = pokeApiService.getPokedex(1) // 1 Obtiene la Pokedex Nacional
             pokemonEntries.value = pokedex.pokemonEntries
             loading.value = false
         } catch (e: Exception) {
@@ -83,93 +77,66 @@ fun Pokedex(
                 title = "Pokedex",
                 actions = {
                     IconButton(onClick = { /* Acción de filtrar */ }) {
-                        Icons.Default.Add
+                        Icon(Icons.Filled.Add, contentDescription = "Add")
                     }
                 }
             )
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
-            // Verifica si los datos están cargando
-            if (loading.value) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else {
-                // Pasa los pokemonEntries deserializados a CardListPokedex
-                CardListPokedex(navController, pokemonEntries.value, pokeApiService)
-            }
+            SearchBarSample(
+                list = pokemonEntries.value.map { it.pokemonSpecies.name },
+                contentBelowSearchBar = {
+                    if (loading.value) {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    } else {
+                        CardListPokedex(navController, pokemonEntries.value, pokeApiService)
+                    }
+                }
+            )
         }
     }
 }
 
-
-/**
- * Renderiza una lista de tarjetas (`PokedexCard`) en una columna perezosa (`LazyColumn`).
- */
 @Composable
-<<<<<<< HEAD:app/src/main/java/com/example/pmdm_pokedex_composable/view/Pokedex.kt
 fun CardListPokedex(
     navController: NavHostController,
     pokemonEntries: List<Pokedex.PokemonEntries>,
     pokeApiService: PokeApiService
 ) {
+    // Mostramos la lista de Pokémon usando LazyColumn
     LazyColumn(Modifier.background(MaterialTheme.colorScheme.background)) {
         items(pokemonEntries) { entry ->
-            // Estado para el Pokémon actual
-            val loading = remember { mutableStateOf(true) }
             val pokemon = remember { mutableStateOf<Pokemon?>(null) }
 
-            // Realiza la solicitud solo si el Pokémon aún no se ha cargado
             LaunchedEffect(entry.pokemonSpecies.name) {
                 try {
                     val pokemonData = pokeApiService.getPokemon(entry.pokemonSpecies.name)
                     pokemon.value = pokemonData
-                    loading.value = false
                 } catch (e: Exception) {
                     println("Error al obtener datos: ${e.message}")
-                    loading.value = false
                 }
             }
 
-            if (loading.value) {
-                CircularProgressIndicator()
-            } else {
+            if (pokemon.value != null) {
                 val sprites = pokemon.value?.sprites
                 val pokemonImage = sprites?.normalSprites?.get(0)
 
                 PokedexCard(
                     name = entry.pokemonSpecies.name,
                     id = pokemon.value?.id.toString(),
-                    pokemonImage = (pokemonImage ?: painterResource(R.drawable.bulbasaur)).toString(), // Imagen por defecto en caso de error
+                    pokemonImage = (pokemonImage ?: painterResource(R.drawable.error_unown)).toString(), // Imagen por defecto en caso de error
                     imgType01 = painterResource(R.drawable.type_grass),
                     imgType02 = painterResource(R.drawable.type_poison),
                     onClick = { navController.navigate("PokemonView") }
                 )
+            } else {
+                CircularProgressIndicator()
             }
-=======
-fun CardList(navController: NavHostController){
-    NavHost(
-        navController = navController,
-        startDestination = "Pokedex"
-    ) {
-        composable("PokemonView") { PokemonView() }
-    }
-
-    LazyColumn (
-        Modifier.background(MaterialTheme.colorScheme.background)
-    ){
-        items(100) { i ->
-            PokedexCard(
-                name = "Bulbasaur",
-                id = "#$i",
-                pokemonImage = painterResource(R.drawable.bulbasaur),
-                imgType01 = painterResource(R.drawable.type_grass),
-                imgType02 = painterResource(R.drawable.type_poison),
-                onClick = { navController.navigate("PokemonView")}
-            )
->>>>>>> ae1e30742ccb2c7e31f4262103dac852f27b663b:app/src/main/java/com/example/pmdm_pokedex_composable/Pokedex.kt
         }
     }
 }
+
 
 
 /**
@@ -199,7 +166,7 @@ fun PokedexCard(
         builder = {
             crossfade(true)
             placeholder(R.drawable.placeholder_ditto)
-            error(R.drawable.error_unown_question_mark)
+            error(R.drawable.error_unown)
         }
     )
 

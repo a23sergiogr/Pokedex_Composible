@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.pmdm_pokedex_composable.R
+import com.example.pmdm_pokedex_composable.model.data_classes.pokeApiService
 import com.example.pmdm_pokedex_composable.ui.theme.PMDM_Pokedex_ComposableTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -62,21 +64,27 @@ fun MoveDex(
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
-            BottomSheetMoveDex {
-                Moves(
-                    MaterialTheme.colorScheme.background,
-                    0xFF95c799,
-                    painterResource(R.drawable.type_grass),
-                    "Gigadrenado",
-                    "special",
-                    "75",
-                    "100",
-                    "15",
-                    "0",
-                    "Steals 1/2 of the damage inflicted",
-                    "Inflicts regular damage. Drains half the damage inflicted to heal the user"
-                )
-            }
+            SearchBarSample(
+                list = listOf("Charmander", "Bulbasaur", "Squirtle", "Pikachu"),
+                contentBelowSearchBar = {
+
+                    BottomSheetMoveDex {
+                        Moves(
+                            MaterialTheme.colorScheme.background,
+                            0xFF95c799,
+                            painterResource(R.drawable.type_grass),
+                            "Gigadrenado",
+                            "special",
+                            "75",
+                            "100",
+                            "15",
+                            "0",
+                            "Steals 1/2 of the damage inflicted",
+                            "Inflicts regular damage. Drains half the damage inflicted to heal the user"
+                        )
+                    }
+                }
+            )
         }
     }
 }
@@ -207,102 +215,6 @@ fun MoveCard(
         }
     }
 }
-
-
-
-@Composable
-fun PhysicalCard() {
-    ElevatedCard(
-        modifier = Modifier
-            .border(
-                width = 2.dp,
-                color = Color(0xFFC62828),
-                shape = RoundedCornerShape(8.dp)
-            ),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = Color(0xFFFFCDD2)
-        ),
-    ) {
-        Row(
-            modifier = Modifier.padding(vertical = 4.dp, horizontal = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Physical",
-                color = Color(0xFFC62828),
-                modifier = Modifier.padding(end = 8.dp)
-            )
-            Image(
-                painter = painterResource(R.drawable.physical_move),
-                contentDescription = "physical_move",
-                modifier = Modifier.size(32.dp)
-            )
-        }
-    }
-}
-
-@Composable
-fun SpecialCard() {
-    ElevatedCard(
-        modifier = Modifier
-            .border(
-                width = 2.dp,
-                color = Color(0xFF1565C0),
-                shape = RoundedCornerShape(8.dp)
-            ),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = Color(0xFFBBDEFB)
-        ),
-    ) {
-        Row(
-            modifier = Modifier.padding(vertical = 4.dp, horizontal = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Special",
-                color = Color(0xFF1565C0),
-                modifier = Modifier.padding(end = 8.dp)
-            )
-            Image(
-                painter = painterResource(R.drawable.special_move),
-                contentDescription = "special_move",
-                modifier = Modifier.size(32.dp)
-            )
-        }
-    }
-}
-
-@Composable
-fun StatusCard() {
-    ElevatedCard(
-        modifier = Modifier
-            .border(
-                width = 2.dp,
-                color = Color(0xFF2E7D32),
-                shape = RoundedCornerShape(8.dp)
-            ),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = Color(0xFFC8E6C9)
-        ),
-    ) {
-        Row(
-            modifier = Modifier.padding(vertical = 4.dp, horizontal = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Status",
-                color = Color(0xFF2E7D32),
-                modifier = Modifier.padding(end = 8.dp)
-            )
-            Image(
-                painter = painterResource(R.drawable.status_move),
-                contentDescription = "status_move",
-                modifier = Modifier.size(32.dp)
-            )
-        }
-    }
-}
-
 
 @Composable
 fun Moves(
@@ -458,25 +370,3 @@ fun Moves(
     }
 }
 
-
-@Preview
-@Composable
-fun preview(){
-    PMDM_Pokedex_ComposableTheme {
-        BottomSheetMoveDex {
-            Moves(
-                MaterialTheme.colorScheme.background,
-                0xFF95c799,
-                painterResource(R.drawable.type_grass),
-                "Gigadrenado",
-                "special",
-                "75",
-                "100",
-                "15",
-                "0",
-                "Steals 1/2 of the damage inflicted",
-                "Inflicts regular damage. Drains half the damage inflicted to heal the user"
-            )
-        }
-    }
-}

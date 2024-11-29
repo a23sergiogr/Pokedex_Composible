@@ -11,26 +11,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,        // Color principal
-    secondary = DeepPurple,    // Acento morado profundo
-    tertiary = Pink80,         // Acento rosado
-    background = DarkGrey,     // Fondo oscuro
-    surface = PurpleGrey80,    // Superficies ligeramente elevadas
-    onPrimary = LightGrey,     // Texto sobre elementos principales
-    onSecondary = WineRed,     // Elementos destacados en rojo vino
-    onBackground = LightGrey   // Texto en fondos
+    primary = Teal200,         // Color principal (un verde-azul suave y brillante)
+    secondary = Amber500,      // Acento cálido (ámbar para un contraste llamativo)
+    tertiary = Lime500,        // Acento en verde lima para detalles vivos
+    background = Charcoal,     // Fondo oscuro (más suave y moderno que un gris común)
+    surface = DarkSlate,       // Superficies elevadas, con un toque de azul oscuro
+    onPrimary = Black,         // Texto en negro para visibilidad
+    onSecondary = DarkRed,     // Texto o elementos en un rojo oscuro
+    onBackground = White       // Texto en blanco sobre el fondo oscuro
 )
 
+
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,        // Color principal
-    secondary = DeepPurple,    // Acento morado profundo
-    tertiary = Pink40,         // Acento rosado
-    background = LightGrey,    // Fondo claro
-    surface = PurpleGrey40,    // Superficies ligeramente elevadas
-    onPrimary = DarkGrey,      // Texto sobre elementos principales
-    onSecondary = WineRed,     // Elementos destacados en rojo vino
-    onBackground = DarkGrey    // Texto en fondos
+    primary = Teal700,         // Color principal (un tono más oscuro de verde-azul)
+    secondary = Amber600,      // Acento cálido (amarillo anaranjado medio)
+    tertiary = Lime600,        // Acento en verde más saturado
+    background = OffWhite,     // Fondo claro, pero no tan blanco para suavizar
+    surface = LightSlate,      // Superficies ligeramente elevadas con un toque de gris azulado
+    onPrimary = White,         // Texto en blanco sobre elementos principales
+    onSecondary = DarkSlate,   // Texto en gris oscuro para resaltar los acentos
+    onBackground = Charcoal    // Texto en gris oscuro sobre el fondo claro
 )
+
 
 
 @Composable
