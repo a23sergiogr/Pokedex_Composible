@@ -30,6 +30,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +45,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.pmdm_pokedex_composable.R
+import com.example.pmdm_pokedex_composable.controler.PokemonDataController
+import com.example.pmdm_pokedex_composable.model.data_classes.Pokedex
 import com.example.pmdm_pokedex_composable.model.data_classes.pokeApiService
 import com.example.pmdm_pokedex_composable.ui.theme.PMDM_Pokedex_ComposableTheme
 import kotlinx.coroutines.CoroutineScope
@@ -49,7 +55,35 @@ import kotlinx.coroutines.launch
 @Composable
 fun MoveDex(
     drawerState: DrawerState,
+    pokemonDataController: PokemonDataController
     ){
+    val pokemonList = remember { mutableStateListOf<PokemonCardData>() }
+    val loading = remember { mutableStateOf(true) }
+    var pokedex: Pokedex
+
+    LaunchedEffect(Unit) {
+        try {
+            loading.value = false
+
+            pokedex = pokemonDataController.getPokedex()
+
+            pokedex.pokemonEntries.forEach {
+                pokemonList.add(
+                    PokemonCardData(
+                        name = it.pokemonSpecies.name,
+                        id = it.entryNumber.toString(),
+                    )
+                )
+            }
+
+            loading.value = true
+
+        } catch (e: Exception) {
+            loading.value = false
+        }
+    }
+
+
     Scaffold(
         topBar = {
             TopBar(

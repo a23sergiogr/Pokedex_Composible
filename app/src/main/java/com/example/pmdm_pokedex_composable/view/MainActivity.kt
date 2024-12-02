@@ -101,6 +101,7 @@ fun MainPanel() {
 
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val pokemonDataController =  PokemonDataController.getInstance(pokeApiService)
 
     Box(
         modifier = Modifier
@@ -119,12 +120,13 @@ fun MainPanel() {
                         Pokedex(
                             drawerState = drawerState,
                             navController = navController,
-                            pokemonDataController =  PokemonDataController.getInstance(pokeApiService)
+                            pokemonDataController =  pokemonDataController
                         )
                     }
                     composable("MoveDex") {
                         MoveDex(
                             drawerState = drawerState,
+                            pokemonDataController =  pokemonDataController
                         )
                     }
                     composable(

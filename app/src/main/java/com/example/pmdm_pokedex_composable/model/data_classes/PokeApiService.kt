@@ -1,5 +1,6 @@
 package com.example.pmdm_pokedex_composable.model.data_classes
 
+import com.example.pmdm_pokedex_composable.model.deserializers.GsonDeserializerEvolutionChain
 import com.example.pmdm_pokedex_composable.model.deserializers.GsonDeserializerPokedex
 import com.example.pmdm_pokedex_composable.model.deserializers.GsonDeserializerPokemon
 import com.example.pmdm_pokedex_composable.model.deserializers.GsonDeserializerSpecies
@@ -34,6 +35,9 @@ interface PokeApiService {
 
     @GET("move/{id}")
     suspend fun getMove(@Path("id") id: Int): Move
+
+    @GET("evolution-chain/{id}")
+    suspend fun getEvolutionChain(@Path("id") id: String): EvolutionChain
 }
 
 val retrofit = Retrofit.Builder()
@@ -45,6 +49,7 @@ val retrofit = Retrofit.Builder()
                 .registerTypeAdapter(Pokemon::class.java, GsonDeserializerPokemon())
                 .registerTypeAdapter(Sprites::class.java, GsonDeserializerSprites())
                 .registerTypeAdapter(Species::class.java, GsonDeserializerSpecies())
+                .registerTypeAdapter(EvolutionChain::class.java, GsonDeserializerEvolutionChain())
                 .create()
         )
     ).build()
