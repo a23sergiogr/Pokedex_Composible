@@ -25,19 +25,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun PreviewMoves(){
     PMDM_Pokedex_ComposableTheme {
-//        Moves(
-//            MaterialTheme.colorScheme.background,
-//            0xFF95c799,
-//            painterResource(R.drawable.type_grass),
-//            "Gigadrenado",
-//            "special",
-//            "75",
-//            "100",
-//            "15",
-//            "0",
-//            "Steals 1/2 of the damage inflicted",
-//            "Inflicts regular damage. Drains half the damage inflicted to heal the user"
-//        )
         BottomSheetWithMoves()
     }
 }

@@ -20,10 +20,10 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -42,13 +42,10 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.pmdm_pokedex_composable.R
 import com.example.pmdm_pokedex_composable.controler.PokemonDataController
 import com.example.pmdm_pokedex_composable.model.data_classes.Pokedex
-import com.example.pmdm_pokedex_composable.model.data_classes.pokeApiService
-import com.example.pmdm_pokedex_composable.ui.theme.PMDM_Pokedex_ComposableTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -57,7 +54,7 @@ fun MoveDex(
     drawerState: DrawerState,
     pokemonDataController: PokemonDataController
     ){
-    val pokemonList = remember { mutableStateListOf<PokemonCardData>() }
+    val movesList = remember { mutableStateListOf<MovesData>() }
     val loading = remember { mutableStateOf(true) }
     var pokedex: Pokedex
 
@@ -68,10 +65,9 @@ fun MoveDex(
             pokedex = pokemonDataController.getPokedex()
 
             pokedex.pokemonEntries.forEach {
-                pokemonList.add(
-                    PokemonCardData(
-                        name = it.pokemonSpecies.name,
-                        id = it.entryNumber.toString(),
+                movesList.add(
+                    MovesData(
+                        ""
                     )
                 )
             }
@@ -84,39 +80,30 @@ fun MoveDex(
     }
 
 
+
+
     Scaffold(
         topBar = {
             TopBar(
                 drawerState = drawerState,
-                title = "MoveDex",
+                title = "Pokedex",
                 actions = {
                     IconButton(onClick = { /* Acción de filtrar */ }) {
-                        Icons.Default.Add
+                        Icon(Icons.Filled.Add, contentDescription = "Add")
                     }
                 }
             )
-        }
+        },
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
-            SearchBarSample(
-                list = listOf("Charmander", "Bulbasaur", "Squirtle", "Pikachu"),
-                contentBelowSearchBar = {
-
-                    BottomSheetMoveDex {
-                        Moves(
-                            MaterialTheme.colorScheme.background,
-                            0xFF95c799,
-                            painterResource(R.drawable.type_grass),
-                            "Gigadrenado",
-                            "special",
-                            "75",
-                            "100",
-                            "15",
-                            "0",
-                            "Steals 1/2 of the damage inflicted",
-                            "Inflicts regular damage. Drains half the damage inflicted to heal the user"
-                        )
-                    }
+            SearchBarMoves(
+                list = movesList, // lista de objetos Pokemon
+                card = { pokemon ->
+//                    MoveCard(
+//                        pokemonCardData = pokemon,
+//                        pokemonDataController = pokemonDataController,
+//                        navController = navController
+//                    )
                 }
             )
         }
@@ -155,6 +142,7 @@ fun MoveCardList(
     ){
         items(100) { i ->
             MoveCard(
+                "gigadrenado",
                 0xFF95c799,
                 "60",
                 "100",
@@ -171,6 +159,7 @@ fun MoveCardList(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoveCard(
+    name: String,
     typeColor: Long,
     power: String,
     accuracy: String,
@@ -212,8 +201,11 @@ fun MoveCard(
                         .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
                     Text(
-                    text = "Power: $power"
-                )
+                        text = name
+                    )
+                    Text(
+                        text = "Power: $power"
+                    )
 
                     Text(
                         text = "Accuracy: $accuracy"
@@ -404,3 +396,6 @@ fun Moves(
     }
 }
 
+data class MovesData(
+    val name: String
+)
