@@ -2,6 +2,7 @@ package com.example.pmdm_pokedex_composable.model.data_classes
 
 import com.example.pmdm_pokedex_composable.model.deserializers.GsonDeserializerPokedex
 import com.example.pmdm_pokedex_composable.model.deserializers.GsonDeserializerPokemon
+import com.example.pmdm_pokedex_composable.model.deserializers.GsonDeserializerSpecies
 import com.example.pmdm_pokedex_composable.model.deserializers.GsonDeserializerSprites
 import com.google.gson.GsonBuilder
 import retrofit2.Retrofit
@@ -43,6 +44,7 @@ val retrofit = Retrofit.Builder()
                 .registerTypeAdapter(Pokedex::class.java, GsonDeserializerPokedex())
                 .registerTypeAdapter(Pokemon::class.java, GsonDeserializerPokemon())
                 .registerTypeAdapter(Sprites::class.java, GsonDeserializerSprites())
+                .registerTypeAdapter(Species::class.java, GsonDeserializerSpecies())
                 .create()
         )
     ).build()

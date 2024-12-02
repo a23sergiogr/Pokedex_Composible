@@ -4,7 +4,7 @@ import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
 import com.example.pmdm_pokedex_composable.model.data_classes.Ability
-import data_classes.urlclasses.NamedURLs
+import com.example.pmdm_pokedex_composable.model.data_classes.urlclasses.NamedURLs
 import java.lang.reflect.Type
 
 class GsonDeserializerAbility: JsonDeserializer<Ability> {
@@ -22,7 +22,7 @@ class GsonDeserializerAbility: JsonDeserializer<Ability> {
             pokemons.add(
                 Ability.PokemonURL(
                 isHidden = obj .get("is_hidden").asBoolean,
-                url = context.deserialize(obj.get("pokemon"),NamedURLs::class.java)
+                url = context.deserialize(obj.get("pokemon"), NamedURLs::class.java)
             ))
         }
 

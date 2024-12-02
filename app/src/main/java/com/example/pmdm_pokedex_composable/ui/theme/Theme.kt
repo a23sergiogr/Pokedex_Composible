@@ -33,6 +33,49 @@ private val LightColorScheme = lightColorScheme(
     onBackground = Charcoal    // Texto en gris oscuro sobre el fondo claro
 )
 
+private val PurpleThemeDark = darkColorScheme(
+    primary = Purple700,         // Color principal (morado oscuro)
+    secondary = Magenta500,      // Acento magenta cálido
+    tertiary = Lavender500,      // Acento lavanda
+    background = DeepPurple,     // Fondo oscuro profundo
+    surface = DarkPlum,          // Superficies elevadas
+    onPrimary = White,           // Texto en blanco sobre morado
+    onSecondary = Onyx,          // Texto en negro sobre magenta
+    onBackground = White         // Texto en blanco sobre fondo oscuro
+)
+
+private val PurpleThemeLight = lightColorScheme(
+    primary = Purple200,         // Color principal (morado claro)
+    secondary = Magenta700,      // Acento magenta oscuro
+    tertiary = Lavender600,      // Acento lavanda suave
+    background = Ivory,          // Fondo claro cálido
+    surface = SoftGray,          // Superficies claras
+    onPrimary = Onyx,            // Texto negro sobre morado claro
+    onSecondary = White,         // Texto en blanco sobre magenta oscuro
+    onBackground = DeepPurple    // Texto en morado oscuro sobre fondo claro
+)
+
+private val YellowThemeDark = darkColorScheme(
+    primary = Yellow700,         // Color principal (amarillo oscuro dorado)
+    secondary = Orange500,       // Acento en naranja cálido
+    tertiary = Gold500,          // Acento en dorado brillante
+    background = DeepBrown,      // Fondo oscuro marrón profundo
+    surface = RichAmber,         // Superficies elevadas
+    onPrimary = Midnight,        // Texto en negro sobre amarillo
+    onSecondary = White,         // Texto en blanco sobre naranja
+    onBackground = White         // Texto en blanco sobre fondo oscuro
+)
+
+private val YellowThemeLight = lightColorScheme(
+    primary = Yellow200,         // Color principal (amarillo pastel)
+    secondary = Orange700,       // Acento en naranja oscuro
+    tertiary = Gold600,          // Acento en dorado cálido
+    background = Vanilla,        // Fondo claro cálido
+    surface = LightTan,          // Superficies claras
+    onPrimary = Midnight,        // Texto negro sobre amarillo pastel
+    onSecondary = White,         // Texto en blanco sobre naranja oscuro
+    onBackground = DeepBrown     // Texto en marrón profundo sobre fondo claro
+)
 
 
 @Composable

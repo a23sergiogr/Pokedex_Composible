@@ -33,39 +33,85 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.IconButton
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.graphics.Color
+import coil.compose.rememberImagePainter
 import com.example.pmdm_pokedex_composable.R
+import com.example.pmdm_pokedex_composable.controler.PokemonDataController
 import com.example.pmdm_pokedex_composable.model.data_classes.Pokemon
 import com.example.pmdm_pokedex_composable.model.data_classes.Species
 import com.example.pmdm_pokedex_composable.model.data_classes.Sprites
+import com.example.pmdm_pokedex_composable.model.data_classes.pokeApiService
 import com.google.accompanist.pager.*
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 
 @Composable
 fun PokemonView(
-    pokemon: Pokemon,
-    species: Species,
-    sprites: Sprites
+    pokemonId: String?
 ){
+
+    // Estado de carga y pokemon
+    val loading = remember { mutableStateOf(true) }
+    val pokemon = remember { mutableStateOf<Pokemon?>(null) }
+    val specie = remember { mutableStateOf<Species?>(null) }
+    val pokemonDataController = PokemonDataController.getInstance(pokeApiService)
+
+    // Llamada asíncrona
+    LaunchedEffect(pokemonId) {
+        try {
+            loading.value = true
+
+            // Simula la llamada para obtener los datos del Pokémon
+            pokemon.value = pokemonId?.let { pokemonDataController.getPokemon(it) }
+            specie.value = pokemonId?.let { pokemonDataController.getSpecies(it) }
+
+            loading.value = false
+        } catch (e: Exception) {
+            loading.value = false
+        }
+    }
+
+    // Cargo datos de los pokemons
+    val types =  pokemon.value?.types
+    val typeOne = if (!types.isNullOrEmpty() && types.isNotEmpty()) types[0].name else null
+    val typeTwo = if (!types.isNullOrEmpty() && types.size > 1) types[1].name else null
+
+    val typeOneCard = getTypeCardSafe(typeOne)
+    val typeTwoCard = getTypeCardSafe(typeTwo)
+
+    val weightInKg = (pokemon.value?.weight ?: -9999) / 10.0
+    val heightInMeters = (pokemon.value?.height ?: -9999) / 10.0
+
+    val formattedWeight = if (weightInKg >= 0) String.format("%.1f kg", weightInKg) else "N/A"
+    val formattedHeight = if (heightInMeters >= 0) String.format("%.1f m", heightInMeters) else "N/A"
+
+    val description = (specie.value?.flavorText?.get(0) ?: "N/A").toString().replace("\n", " ")
+
+
     Column (
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ){
         TopView(
-            name = "Bulbasaur",
-            id = "#$001",
-            pokemonImage = painterResource(R.drawable.bulbasaur),
-            imgType01 = painterResource(R.drawable.type_grass),
-            imgType02 = painterResource(R.drawable.type_poison)
+            name = (pokemon.value?.name ?: "unown").replaceFirstChar { it.uppercase(Locale.getDefault()) },
+            id = (pokemon.value?.id ?: -9999).toString(),
+            sprites = pokemon.value?.sprites,
+            typeOneCard = typeOneCard,
+            typeTwoCard = typeTwoCard
         )
         InfoSlider(
             listOf(
                 {
                     BasicInfo(
-                        "123",
-                        "321",
+                        weight = formattedWeight,
+                        height = formattedHeight,
+                        description = description,
                         listOf(
                             painterResource(R.drawable.bulbasaur),
                             painterResource(R.drawable.bulbasaur),
@@ -91,9 +137,9 @@ fun PokemonView(
 fun TopView(
     name: String,
     id: String,
-    pokemonImage: Painter,
-    imgType01: Painter,
-    imgType02: Painter?
+    sprites: Sprites?,
+    typeOneCard: @Composable () -> Unit,
+    typeTwoCard: @Composable () -> Unit?
 ) {
     // Obtén los colores del tema actual
     val textColor = MaterialTheme.colorScheme.onPrimary
@@ -125,7 +171,7 @@ fun TopView(
                             .padding(end = 2.dp),
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center,
-                        color = textColor // Usar color primario del tema
+                        color = textColor
                     )
                     Text(
                         text = id,
@@ -140,27 +186,14 @@ fun TopView(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 4.dp),
+                        .padding(top = 30.dp, bottom = 6.dp),
                     horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Imágenes de los tipos
-                    Image(
-                        painter = imgType01,
-                        contentDescription = "type01",
-                        modifier = Modifier
-                            .padding(end = 10.dp)
-                            .size(80.dp)
-                    )
-                    if (imgType02 != null) {
-                        Image(
-                            painter = imgType02,
-                            contentDescription = "type02",
-                            modifier = Modifier
-                                .padding(end = 10.dp)
-                                .size(80.dp)
-                        )
-                    }
+
+                    typeOneCard.invoke()
+                    typeTwoCard.invoke()
 
                     Spacer(modifier = Modifier.weight(1f))
 
@@ -198,9 +231,7 @@ fun TopView(
                     )
                 ) {
                     ImageSlider(
-                        listOf(painterResource(R.drawable.bulbasaur),painterResource(R.drawable.type_poison), painterResource(
-                            R.drawable.type_grass
-                        )),
+                        images = sprites?.normalSprites ?: listOf("")
                     )
                 }
             }
@@ -210,7 +241,7 @@ fun TopView(
 
 @Composable
 fun ImageSlider(
-    images: List<Painter>
+    images: List<String>
 ) {
     val pagerState = rememberPagerState()
     Box(
@@ -242,12 +273,22 @@ fun ImageSlider(
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.secondary)
                 ) { page ->
+
+                    val painter = rememberImagePainter(
+                        images[page],
+                        builder = {
+                            crossfade(true)
+                            placeholder(R.drawable.placeholder_ditto)
+                            error(R.drawable.error_unown)
+                        }
+                    )
+
                     Image(
-                        painter = images[page],
+                        painter = painter,
                         contentDescription = "Image ${page + 1}",
                         modifier = Modifier
                             .padding(8.dp)
-                            .fillMaxHeight()
+                            .fillMaxSize()
                     )
                 }
             }
@@ -315,7 +356,11 @@ fun InfoSlider(
 
 
 @Composable
-fun BasicInfo(weight: String, height: String, evolutions: List<Painter>){
+fun BasicInfo(
+    weight: String,
+    height: String,
+    description: String,
+    evolutions: List<Painter>){
     Column (
         modifier = Modifier
             .background(MaterialTheme.colorScheme.primary)
@@ -329,7 +374,7 @@ fun BasicInfo(weight: String, height: String, evolutions: List<Painter>){
         Text(
             color = MaterialTheme.colorScheme.onPrimary,
             modifier = Modifier.padding(12.dp),
-            text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur volutpat venenatis quam non ullamcorper. Nulla facilisi. Vivamus lacinia mauris non consequat sagittis. "
+            text = description
         )
         ElevatedCard (
             modifier = Modifier.padding(12.dp),
@@ -413,54 +458,54 @@ fun BasicInfo(weight: String, height: String, evolutions: List<Painter>){
 
 
 
-@Preview(showBackground = true)
-@Composable
-fun Preview() {
-    PMDM_Pokedex_ComposableTheme {
-        Column (
-            modifier = Modifier
-                .fillMaxSize()
-        ){
-            TopView(
-                name = "Bulbasaur",
-                id = "#$001",
-                pokemonImage = painterResource(R.drawable.bulbasaur),
-                imgType01 = painterResource(R.drawable.type_grass),
-                imgType02 = painterResource(R.drawable.type_poison)
-            )
-
-            Column (
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-            ){
-                ImageSlider(listOf(painterResource(R.drawable.bulbasaur),painterResource(R.drawable.type_poison), painterResource(R.drawable.type_grass)),)
-
-                InfoSlider(
-                    listOf(
-                        {
-                            BasicInfo(
-                                "123",
-                                "321",
-                                listOf(
-                                    painterResource(R.drawable.bulbasaur),
-                                    painterResource(R.drawable.bulbasaur),
-                                    painterResource(R.drawable.bulbasaur)))
-                        },
-                        {
-                            Estadisticas(
-                                "45",
-                                "49",
-                                "49",
-                                "65",
-                                "65",
-                                "40",
-                                "305"
-                            )
-                        }
-                    )
-                )
-            }
-        }
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun Preview() {
+//    PMDM_Pokedex_ComposableTheme {
+//        Column (
+//            modifier = Modifier
+//                .fillMaxSize()
+//        ){
+//            TopView(
+//                name = "Bulbasaur",
+//                id = "#$001",
+//                pokemonImage = painterResource(R.drawable.bulbasaur),
+//                imgType01 = painterResource(R.drawable.type_grass),
+//                imgType02 = painterResource(R.drawable.type_poison)
+//            )
+//
+//            Column (
+//                modifier = Modifier
+//                    .fillMaxSize()
+//                    .verticalScroll(rememberScrollState())
+//            ){
+//                ImageSlider(listOf(painterResource(R.drawable.bulbasaur),painterResource(R.drawable.type_poison), painterResource(R.drawable.type_grass)),)
+//
+//                InfoSlider(
+//                    listOf(
+//                        {
+//                            BasicInfo(
+//                                "123",
+//                                "321",
+//                                listOf(
+//                                    painterResource(R.drawable.bulbasaur),
+//                                    painterResource(R.drawable.bulbasaur),
+//                                    painterResource(R.drawable.bulbasaur)))
+//                        },
+//                        {
+//                            Estadisticas(
+//                                "45",
+//                                "49",
+//                                "49",
+//                                "65",
+//                                "65",
+//                                "40",
+//                                "305"
+//                            )
+//                        }
+//                    )
+//                )
+//            }
+//        }
+//    }
+//}

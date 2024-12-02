@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -38,35 +37,27 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.pmdm_pokedex_composable.R
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.semantics.*
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import com.example.pmdm_pokedex_composable.controler.PokemonDataController
+import com.example.pmdm_pokedex_composable.model.data_classes.Pokemon
 import com.example.pmdm_pokedex_composable.model.data_classes.pokeApiService
 
 
@@ -75,7 +66,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            PMDM_Pokedex_ComposableTheme {
+            PMDM_Pokedex_ComposableTheme(dynamicColor = false) {
                 MainPanel()
             }
         }
@@ -128,7 +119,7 @@ fun MainPanel() {
                         Pokedex(
                             drawerState = drawerState,
                             navController = navController,
-                            pokeApiService = pokeApiService
+                            pokemonDataController =  PokemonDataController.getInstance(pokeApiService)
                         )
                     }
                     composable("MoveDex") {
@@ -136,8 +127,14 @@ fun MainPanel() {
                             drawerState = drawerState,
                         )
                     }
-                    composable("PokemonView") {
-                        //PokemonView()
+                    composable(
+                        route = "PokemonView/{pokemonId}",
+                        arguments = listOf(navArgument("pokemonId") { type = NavType.StringType })
+                    ) { backStackEntry ->
+                        val pokemonId = backStackEntry.arguments?.getString("pokemonId")
+                        PokemonView(
+                            pokemonId = pokemonId
+                        )
                     }
                 }
             }
@@ -233,50 +230,86 @@ fun SearchBarSample(
     list: List<String>, // Lista sobre la que se hará la búsqueda
     contentBelowSearchBar: @Composable () -> Unit // Contenido adicional debajo de la barra de búsqueda
 ) {
-    val textFieldState = rememberTextFieldState()
-    val searchQuery = textFieldState.text
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+    var isSearchBarActive by rememberSaveable { mutableStateOf(false) }
 
     // Filtrar los resultados según el texto de búsqueda
     val filteredList = list.filter { it.contains(searchQuery, ignoreCase = true) }
 
     Box(Modifier.fillMaxSize()) {
-        // Barra de búsqueda siempre expandida
+        // Barra de búsqueda
         SearchBar(
+            query = searchQuery,
+            onQueryChange = { searchQuery = it },
+            onSearch = { /* Acciones al confirmar la búsqueda */ },
+            active = isSearchBarActive,
+            onActiveChange = { isSearchBarActive = it },
+            placeholder = { Text("Search Pokémon") },
+            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+            trailingIcon = { Icon(Icons.Filled.MoreVert, contentDescription = null) },
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .fillMaxWidth(),
-            inputField = {
-                SearchBarDefaults.InputField(
-                    state = textFieldState,
-                    onSearch = { },
-                    expanded = true, // Mantener expandida la barra
-                    onExpandedChange = { },
-                    placeholder = { Text("Search Pokémon") },
-                    leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-                    trailingIcon = { Icon(Icons.Filled.MoreVert, contentDescription = null) },
-                )
-            },
-            expanded = true,
-            onExpandedChange = { }, // No se necesita acción de expansión
-            content = {
-//                // Mostrar los resultados filtrados debajo de la barra de búsqueda
-//                Column(Modifier.verticalScroll(rememberScrollState())) {
-//                    filteredList.forEach { item ->
-//                        Text(
-//                            text = item,
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .padding(16.dp)
-//                        )
-//                    }
-//                }
-
-                // Componente adicional debajo de la barra de búsqueda
-                contentBelowSearchBar()
+                .fillMaxWidth()
+        ) {
+            // Mostrar los resultados filtrados
+            LazyColumn {
+                items(filteredList) { item ->
+                    Text(
+                        text = item,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .clickable { /* Acciones al seleccionar */ }
+                    )
+                }
             }
-        )
+        }
+
+        // Contenido adicional debajo de la barra de búsqueda
+        contentBelowSearchBar()
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SearchBarCardSample(
+    list: List<PokemonCardData>, // Lista de Pokémon para filtrar
+    card: @Composable (PokemonCardData) -> Unit, // Función composable que toma un Pokémon y lo muestra
+) {
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+    var isSearchBarActive by rememberSaveable { mutableStateOf(false) }
+
+    // Filtrar los resultados según el texto de búsqueda
+    val filteredList = list.filter { it.name.contains(searchQuery, ignoreCase = true) }
+
+    Box(Modifier.fillMaxSize()) {
+        // Barra de búsqueda
+        SearchBar(
+            query = searchQuery,
+            onQueryChange = { searchQuery = it },
+            onSearch = { /* Acciones al confirmar la búsqueda */ },
+            active = true,
+            onActiveChange = { isSearchBarActive = it },
+            placeholder = { Text("Search Pokémon") },
+            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+            trailingIcon = { Icon(Icons.Filled.MoreVert, contentDescription = null) },
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+        ) {
+
+            // LazyColumn dentro de SearchBar
+            LazyColumn {
+                items(filteredList) { item ->
+                    // Llamar a la función composable 'card' pasando cada 'item' de la lista
+                    card(item)
+                }
+            }
+        }
+    }
+}
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -23,18 +23,43 @@ enum class PokemonType(val color: Color) {
     FAIRY(Color(0xFFF0A0F0));     // Color para el tipo HADA
 }
 
-fun lightenColor(color: Long, factor: Float = 0.2f): Long {
-    // Extraemos los componentes de color (Rojo, Verde, Azul)
-    val alpha = (color shr 24) and 0xFF
-    val red = (color shr 16) and 0xFF
-    val green = (color shr 8) and 0xFF
-    val blue = color and 0xFF
 
-    // Aplicamos un factor para aclarar cada componente
-    val newRed = (red + (255 - red) * factor).toInt()
-    val newGreen = (green + (255 - green) * factor).toInt()
-    val newBlue = (blue + (255 - blue) * factor).toInt()
+fun lightenColor(color: Color, factor: Float): Color {
+    // Extraemos los componentes del color
+    val red = color.red + (1f - color.red) * factor
+    val green = color.green + (1f - color.green) * factor
+    val blue = color.blue + (1f - color.blue) * factor
+    val alpha = color.alpha // Mantener la transparencia igual
 
-    // Recompone el color claro con los nuevos valores
-    return (alpha shl 24) or ((newRed shl 16).toLong()) or ((newGreen shl 8).toLong()) or newBlue.toLong()
+    return Color(red, green, blue, alpha)
+}
+
+
+fun darkenColor(color: Color, factor: Float): Color {
+    // Extraemos los componentes del color
+    val red = color.red * (1f - factor)
+    val green = color.green * (1f - factor)
+    val blue = color.blue * (1f - factor)
+    val alpha = color.alpha // Mantener la transparencia igual
+
+    return Color(red, green, blue, alpha)
+}
+
+enum class PokemonColor(val hexCode: Long) {
+    BLACK(0xFF000000),
+    BLUE(0xFF0000FF),
+    BROWN(0xFFA52A2A),
+    GRAY(0xFF808080),
+    GREEN(0xFF008000),
+    PINK(0xFFFFC0CB),
+    PURPLE(0xFF800080),
+    RED(0xFFFF0000),
+    WHITE(0xFFFFFFFF),
+    YELLOW(0xFFFFFF00);
+
+    companion object {
+        fun fromName(name: String): PokemonColor? {
+            return values().find { it.name.equals(name, ignoreCase = true) }
+        }
+    }
 }

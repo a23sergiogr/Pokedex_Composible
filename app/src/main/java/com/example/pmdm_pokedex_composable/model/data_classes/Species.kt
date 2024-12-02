@@ -1,6 +1,6 @@
 package com.example.pmdm_pokedex_composable.model.data_classes
 
-import data_classes.urlclasses.NamedURLs
+import com.example.pmdm_pokedex_composable.model.data_classes.urlclasses.NamedURLs
 
 data class Species(
     val baseHappiness: Int,
