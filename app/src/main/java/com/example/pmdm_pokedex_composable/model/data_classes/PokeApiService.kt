@@ -2,6 +2,9 @@ package com.example.pmdm_pokedex_composable.model.data_classes
 
 import com.example.pmdm_pokedex_composable.model.data_classes.urlclasses.NamedURLs
 import com.example.pmdm_pokedex_composable.model.deserializers.GsonDeserializerEvolutionChain
+import com.example.pmdm_pokedex_composable.model.deserializers.GsonDeserializerMove
+import com.example.pmdm_pokedex_composable.model.deserializers.GsonDeserializerMoveListResponse
+import com.example.pmdm_pokedex_composable.model.deserializers.GsonDeserializerNamedURL
 import com.example.pmdm_pokedex_composable.model.deserializers.GsonDeserializerPokedex
 import com.example.pmdm_pokedex_composable.model.deserializers.GsonDeserializerPokemon
 import com.example.pmdm_pokedex_composable.model.deserializers.GsonDeserializerSpecies
@@ -34,14 +37,14 @@ interface PokeApiService {
     @GET("ability/{id}")
     suspend fun getAbility(@Path("id") id: Int): Ability
 
-    @GET("move/{id}")
-    suspend fun getMove(@Path("id") id: Int): Move
+    @GET("move/{name}")
+    suspend fun getMove(@Path("name") name: String): Move
 
     @GET("evolution-chain/{id}")
     suspend fun getEvolutionChain(@Path("id") id: String): EvolutionChain
 
-    @GET("move")
-    suspend fun getMovesList(): List<NamedURLs>
+    @GET("move?limit=1200")
+    suspend fun getMovesList(): MoveListResponse
 }
 
 val retrofit = Retrofit.Builder()
@@ -54,6 +57,9 @@ val retrofit = Retrofit.Builder()
                 .registerTypeAdapter(Sprites::class.java, GsonDeserializerSprites())
                 .registerTypeAdapter(Species::class.java, GsonDeserializerSpecies())
                 .registerTypeAdapter(EvolutionChain::class.java, GsonDeserializerEvolutionChain())
+                .registerTypeAdapter(Move::class.java, GsonDeserializerMove())
+                .registerTypeAdapter(NamedURLs::class.java, GsonDeserializerNamedURL())
+                .registerTypeAdapter(MoveListResponse::class.java, GsonDeserializerMoveListResponse())
                 .create()
         )
     ).build()

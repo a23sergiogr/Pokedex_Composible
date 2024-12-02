@@ -1,25 +1,18 @@
 package com.example.pmdm_pokedex_composable.view
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.BottomSheetScaffoldState
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,150 +31,128 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.pmdm_pokedex_composable.R
 import com.example.pmdm_pokedex_composable.controler.PokemonDataController
-import com.example.pmdm_pokedex_composable.model.data_classes.Pokedex
-import kotlinx.coroutines.CoroutineScope
+import com.example.pmdm_pokedex_composable.model.data_classes.Move
+import com.example.pmdm_pokedex_composable.model.data_classes.pokeApiService
 import kotlinx.coroutines.launch
+import java.util.Locale
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoveDex(
     drawerState: DrawerState,
     pokemonDataController: PokemonDataController
-    ){
-    val movesList = remember { mutableStateListOf<MovesData>() }
+) {
+    val movesList = remember { mutableStateListOf<String>() }
     val loading = remember { mutableStateOf(true) }
-    var pokedex: Pokedex
+    val selectedMove = remember { mutableStateOf<String?>(null) }
+    val scaffoldState = rememberBottomSheetScaffoldState()
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         try {
             loading.value = false
-
-            pokedex = pokemonDataController.getPokedex()
-
-            pokedex.pokemonEntries.forEach {
-                movesList.add(
-                    MovesData(
-                        ""
-                    )
-                )
-            }
-
+            val moveDex = pokemonDataController.getMovesList()
+            movesList.addAll(moveDex.map { it.name })
             loading.value = true
-
         } catch (e: Exception) {
             loading.value = false
         }
     }
 
-
-
-
-    Scaffold(
-        topBar = {
-            TopBar(
-                drawerState = drawerState,
-                title = "Pokedex",
-                actions = {
-                    IconButton(onClick = { /* Acción de filtrar */ }) {
-                        Icon(Icons.Filled.Add, contentDescription = "Add")
-                    }
-                }
-            )
-        },
-    ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
-            SearchBarMoves(
-                list = movesList, // lista de objetos Pokemon
-                card = { pokemon ->
-//                    MoveCard(
-//                        pokemonCardData = pokemon,
-//                        pokemonDataController = pokemonDataController,
-//                        navController = navController
-//                    )
-                }
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun BottomSheetMoveDex(
-    content: @Composable () -> Unit
-){
-    val scaffoldState = rememberBottomSheetScaffoldState()
-    val coroutineScope = rememberCoroutineScope()
-
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetPeekHeight = 0.dp,
         sheetContent = {
-            content()
+            selectedMove.value?.let { moveName ->
+                MoveDetails(
+                    moveName = moveName,
+                    pokemonDataController = pokemonDataController
+                )
+            }
         },
-        sheetContainerColor = Color(0xFF95c799)
-    ) {
-        MoveCardList(coroutineScope, scaffoldState)
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MoveCardList(
-    coroutineScope: CoroutineScope,
-    scaffoldState: BottomSheetScaffoldState
-){
-    LazyColumn  (
-        Modifier
-            .background(MaterialTheme.colorScheme.background)
-    ){
-        items(100) { i ->
-            MoveCard(
-                "gigadrenado",
-                0xFF95c799,
-                "60",
-                "100",
-                "15",
-                painterResource(R.drawable.type_grass),
-                "special",
-                coroutineScope,
-                scaffoldState
-            )
+        sheetContainerColor = MaterialTheme.colorScheme.surface
+    ) { innerPadding ->
+        Scaffold(
+            topBar = {
+                TopBar(
+                    drawerState = drawerState,
+                    title = "MoveDex",
+                    actions = {
+                        IconButton(onClick = { /* Acción de filtrar */ }) {
+                            Icon(Icons.Filled.FilterList, contentDescription = "Filter")
+                        }
+                    }
+                )
+            },
+        ) { contentPadding ->
+            Box(modifier = Modifier.padding(contentPadding)) {
+                SearchBarMoves(
+                    list = movesList,
+                    card = { moveName ->
+                        MoveCard(
+                            name = moveName,
+                            onClick = {
+                                coroutineScope.launch {
+                                    selectedMove.value = moveName
+                                    scaffoldState.bottomSheetState.expand()
+                                }
+                            }
+                        )
+                    }
+                )
+            }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoveCard(
     name: String,
-    typeColor: Long,
-    power: String,
-    accuracy: String,
-    pp: String,
-    imgType: Painter,
-    typo: String,
-    coroutineScope: CoroutineScope,
-    scaffoldState: BottomSheetScaffoldState
-    ){
+    onClick: () -> Unit) {
+
+
+    val loading = remember { mutableStateOf(true) }
+    val move = remember { mutableStateOf<Move?>(null) }
+    val pokemonDataController = PokemonDataController.getInstance(pokeApiService)
+
+    // Llamada asíncrona
+    LaunchedEffect(name) {
+        try {
+            loading.value = true
+
+            // Simula la llamada para obtener los datos del Pokémon
+            move.value = pokemonDataController.getMove(name)
+
+            loading.value = false
+        } catch (e: Exception) {
+            loading.value = false
+        }
+    }
+
+    val power = move.value?.power
+    val accuracy = move.value?.accuracy
+    val pp = move.value?.pp
+    val type = move.value?.type
+
+    val damageClass = move.value?.damageClass
+    val typeColor = type?.let { PokemonType.fromName(it) }
+    val typeCard = getTypeCardSafe(type)
+
+
     ElevatedCard(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.background)
             .padding(vertical = 8.dp, horizontal = 4.dp)
             .border(
                 width = 2.dp,
-                color = Color(typeColor),
+                color = typeColor?.color ?: PokemonType.NORMAL.color,
                 shape = RoundedCornerShape(8.dp)
             ),
         onClick = {
-            coroutineScope.launch {
-                scaffoldState.bottomSheetState.expand()
-            }
+            onClick()
         }
     ) {
         Column(
@@ -191,211 +162,116 @@ fun MoveCard(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(typeColor / 2))
+                    .background(lightenColor(typeColor?.color ?: PokemonType.NORMAL.color, 0.5f))
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically,
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
-                    Text(
-                        text = name
-                    )
-                    Text(
-                        text = "Power: $power"
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = name.replaceFirstChar { it.uppercase(Locale.getDefault()) },
+                            color = darkenColor(typeColor?.color ?: PokemonType.NORMAL.color, 0.6f)
+                        )
+                        Text(
+                            text = "Power: $power",
+                            color = darkenColor(typeColor?.color ?: PokemonType.NORMAL.color, 0.6f)
+                        )
+                    }
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = "Accuracy: $accuracy",
+                            color = darkenColor(typeColor?.color ?: PokemonType.NORMAL.color, 0.6f)
+                        )
 
-                    Text(
-                        text = "Accuracy: $accuracy"
-                    )
-
-                    Text(
-                        text = "PP: $pp"
-                    )
+                        Text(
+                            text = "PP: $pp",
+                            color = darkenColor(typeColor?.color ?: PokemonType.NORMAL.color, 0.6f)
+                        )
+                    }
                 }
             }
+        }
 
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .fillMaxWidth()
-            ) {
-                Image(
-                    painter = imgType,
-                    contentDescription = "type01",
-                    modifier = Modifier
-                        .height(60.dp)
-                        .width(140.dp)
-                )
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(horizontal = 12.dp, vertical = 16.dp)
+                .fillMaxWidth()
+        ) {
 
-                when(typo){
-                    "physical"-> PhysicalCard()
-                    "special"-> SpecialCard()
-                    "status"-> StatusCard()
-                }
+            typeCard.invoke()
+
+            when(damageClass){
+                "physical"-> PhysicalCard()
+                "special"-> SpecialCard()
+                "status"-> StatusCard()
             }
         }
     }
 }
 
 @Composable
-fun Moves(
-    typeColor: Color,
-    moveColor: Long,
-    imgType: Painter,
-    name: String,
-    typo: String,
-    power: String,
-    accuracy: String,
-    pp: String,
-    priority: String,
-    flavorText: String,
-    effect: String,
+fun MoveDetails(
+    moveName: String,
+    pokemonDataController: PokemonDataController
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(typeColor),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            ElevatedCard(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = Color(moveColor)
-                ),
-                shape = RectangleShape
-            ) {
-                Text(
-                    text = name,
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth()
-                )
-            }
+    val move = remember { mutableStateOf<Move?>(null) }
+    val loading = remember { mutableStateOf(true) }
 
-            Row (
-                horizontalArrangement = Arrangement.SpaceAround,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ){
-                Image(
-                    painter = imgType,
-                    contentDescription = "type01",
-                    modifier = Modifier
-                        .size(140.dp)
-                )
+    LaunchedEffect(moveName) {
+        try {
+            loading.value = true
+            move.value = pokemonDataController.getMove(moveName)
+            loading.value = false
+        } catch (e: Exception) {
+            loading.value = false
+        }
+    }
 
-                when(typo){
-                    "physical"-> PhysicalCard()
-                    "special"-> SpecialCard()
-                    "status"-> StatusCard()
-                }
+    if (loading.value) {
+        CircularProgressIndicator(modifier = Modifier.padding(16.dp))
+    } else {
 
-            }
-            Row (
-                horizontalArrangement = Arrangement.SpaceAround,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ){
-                Column {
-                    Text(
-                        text = "Power",
-                    )
+        val power = move.value?.power
+        val accuracy = move.value?.accuracy
+        val pp = move.value?.pp
+        val flavorText = move.value?.flavorText
+        val effect = move.value?.shortEffect
+        val type = move.value?.type
 
-                    Text(
-                        text = power,
-                    )
+        val damageClass = move.value?.damageClass
+        val typeColor = type?.let { PokemonType.fromName(it) }
+        val typeCard = getTypeCardSafe(type)
 
-
-                    Text(
-                        modifier = Modifier.padding(top = 12.dp),
-                        text = "PP",
-                    )
-
-                    Text(
-                        text = pp,
-                    )
-                }
-                Column {
-                    Text(
-                        text = "Accuracy",
-                    )
-
-                    Text(
-                        text = accuracy,
-                    )
-
-
-                    Text(
-                        modifier = Modifier.padding(top = 12.dp),
-                        text = "Priority",
-                    )
-
-                    Text(
-                        text = priority,
-                    )
-                }
-            }
-
-            ElevatedCard(
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = Color(moveColor/2)
-                ),
-                modifier = Modifier.padding( horizontal = 16.dp, vertical = 26.dp),
-            ) {
-                Text(
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier
-                        .padding(top = 26.dp)
-                        .fillMaxWidth(),
-                    text = "Description",
-                    color = Color(moveColor*2)
-                )
-
-                Text(
-                    modifier = Modifier.padding(26.dp),
-                    text = flavorText,
-                )
-            }
-
-            ElevatedCard(
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = Color(moveColor/2)
-                ),
-                modifier = Modifier.padding( horizontal = 16.dp, vertical = 26.dp),
-            ) {
-                Text(
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier
-                        .padding(top = 26.dp)
-                        .fillMaxWidth(),
-                    text = "Effect",
-                    color = Color(moveColor*2)
-                )
-
-                Text(
-                    modifier = Modifier.padding(26.dp),
-                    text = effect,
-                )
-            }
+        move.value?.let {
+            Moves(
+                typeColor = typeColor?.color ?: Color.Red,
+                moveColor = 0xFF,
+                name = moveName,
+                type = damageClass ?: "null",
+                typeCard = typeCard,
+                power = power.toString(),
+                accuracy = accuracy.toString(),
+                pp = pp.toString(),
+                priority = move.value?.priority.toString(),
+                flavorText = flavorText ?: "null",
+                effect = effect ?: "null"
+            )
         }
     }
 }
-
-data class MovesData(
-    val name: String
-)

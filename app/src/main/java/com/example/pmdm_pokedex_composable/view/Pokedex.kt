@@ -39,6 +39,7 @@ import com.example.pmdm_pokedex_composable.model.data_classes.Pokemon
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.graphics.luminance
+import com.example.pmdm_pokedex_composable.controler.NavControllerManager
 import com.example.pmdm_pokedex_composable.controler.PokemonDataController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import java.util.Locale
@@ -47,9 +48,10 @@ import java.util.Locale
 @Composable
 fun Pokedex(
     drawerState: DrawerState,
-    navController: NavHostController,
     pokemonDataController: PokemonDataController
 ) {
+    setUIColors(darkenColor(MaterialTheme.colorScheme.primary, 0.2f))
+
     val pokemonList = remember { mutableStateListOf<PokemonCardData>() }
     val loading = remember { mutableStateOf(true) }
     var pokedex: Pokedex
@@ -76,22 +78,6 @@ fun Pokedex(
         }
     }
 
-    val systemUiController = rememberSystemUiController()
-
-    val isStatusBarLight = MaterialTheme.colorScheme.background.luminance() > 0.5
-    val isNavBarLight = MaterialTheme.colorScheme.surface.luminance() > 0.5
-
-// Configurar colores de la barra de estado y navegación
-    systemUiController.setStatusBarColor(
-        color = darkenColor(MaterialTheme.colorScheme.primary, 0.2f),
-        darkIcons = isStatusBarLight
-    )
-    systemUiController.setNavigationBarColor(
-        color = darkenColor(MaterialTheme.colorScheme.primary, 0.2f),
-        darkIcons = isNavBarLight
-    )
-
-
 
     Scaffold(
         topBar = {
@@ -113,7 +99,6 @@ fun Pokedex(
                     PokedexCard(
                         pokemonCardData = pokemon,
                         pokemonDataController = pokemonDataController,
-                        navController = navController
                     )
                 }
             )
@@ -125,8 +110,10 @@ fun Pokedex(
 fun PokedexCard(
     pokemonCardData: PokemonCardData,
     pokemonDataController: PokemonDataController,
-    navController: NavHostController
 ) {
+
+    val navController = NavControllerManager.getNavController()
+
     // Estado de carga y pokemon
     val loading = remember { mutableStateOf(true) }
     val pokemon = remember { mutableStateOf<Pokemon?>(null) }
@@ -171,7 +158,7 @@ fun PokedexCard(
 
     ElevatedCard(
         onClick = {
-            navController.navigate("PokemonView/${pokemonCardData.id}")
+            navController?.navigate("PokemonView/${pokemonCardData.id}")
         },
         elevation = CardDefaults.cardElevation(
             defaultElevation = 6.dp

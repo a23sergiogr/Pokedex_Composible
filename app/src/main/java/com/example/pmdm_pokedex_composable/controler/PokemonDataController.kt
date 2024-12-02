@@ -48,7 +48,11 @@ class PokemonDataController private constructor(private val pokeApiService: Poke
     }
 
     suspend fun getMovesList(): List<NamedURLs>{
-        return pokeApiService.getMovesList();
+        return pokeApiService.getMovesList().results
+    }
+
+    suspend fun getMove(name: String): Move{
+        return pokeApiService.getMove(name)
     }
 
     private fun extractIdFromUrl(url: String): String {

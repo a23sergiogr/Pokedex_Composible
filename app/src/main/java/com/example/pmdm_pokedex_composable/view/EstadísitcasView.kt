@@ -168,6 +168,7 @@ fun ProgressBar(progress: Float, number: String) {
                 .width((150 * progress).dp)
                 .background(MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(16.dp)) // Progreso
         ) {
+
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
