@@ -21,6 +21,12 @@ enum class PokemonType(val color: Color) {
     DARK(Color(0xFF705848)),      // Color para el tipo SINIESTRO
     STEEL(Color(0xFFB8B8D0)),     // Color para el tipo ACERO
     FAIRY(Color(0xFFF0A0F0));     // Color para el tipo HADA
+
+    companion object {
+        fun fromName(name: String): PokemonType? {
+            return PokemonType.values().find { it.name.equals(name, ignoreCase = true) }
+        }
+    }
 }
 
 enum class PokemonColor(val hexCode: Long) {
@@ -71,6 +77,17 @@ fun tranparentColor(color: Color): Color {
     val green = color.green
     val blue = color.blue
     val alpha = 0f
+
+    return Color(red, green, blue, alpha)
+}
+
+
+fun tranparentColor(color: Color, factor: Float): Color {
+    // Extraemos los componentes del color
+    val red = color.red
+    val green = color.green
+    val blue = color.blue
+    val alpha = color.alpha * (1f - factor)
 
     return Color(red, green, blue, alpha)
 }

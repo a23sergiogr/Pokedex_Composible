@@ -3,6 +3,7 @@ package com.example.pmdm_pokedex_composable.view
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,8 +50,12 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.example.pmdm_pokedex_composable.R
+import com.example.pmdm_pokedex_composable.controler.NavControllerManager
 import com.example.pmdm_pokedex_composable.controler.PokemonDataController
 import com.example.pmdm_pokedex_composable.model.data_classes.EvolutionChain
 import com.example.pmdm_pokedex_composable.model.data_classes.Pokemon
@@ -137,20 +142,7 @@ fun PokemonView(
     val color = Color(PokemonColor.fromName(specie.value?.color.toString())?.hexCode ?: PokemonColor.NULL.hexCode)
     val textColor = darkenColor(color, 0.8f)
 
-    val systemUiController = rememberSystemUiController()
-
-    val isStatusBarLight = MaterialTheme.colorScheme.background.luminance() > 0.5
-    val isNavBarLight = MaterialTheme.colorScheme.surface.luminance() > 0.5
-
-// Configurar colores de la barra de estado y navegación
-    systemUiController.setStatusBarColor(
-        color = darkenColor(color, 0.2f),
-        darkIcons = isStatusBarLight
-    )
-    systemUiController.setNavigationBarColor(
-        color = darkenColor(color, 0.2f),
-        darkIcons = isNavBarLight
-    )
+    setUIColors(darkenColor(color, 0.2f))
 
 
     Column (
@@ -184,6 +176,7 @@ fun PokemonView(
                         textColor = textColor,
                     )
                 },
+                {PokemonMovesView()},
                 {
                     Estadisticas(
                         "45",
@@ -499,6 +492,8 @@ fun BasicInfo(
                         }
                     )
 
+                    val navController = NavControllerManager.getNavController()
+
                     Column(
                         modifier = Modifier.padding(8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -509,6 +504,7 @@ fun BasicInfo(
                             modifier = Modifier
                                 .padding(12.dp)
                                 .size(72.dp)
+                                .clickable { navController?.navigate("PokemonView/${evolutions[i].name}") }
                         )
                         Text(
                             text = evolutions[i].name.replaceFirstChar { it.uppercase(Locale.getDefault()) },

@@ -52,8 +52,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.example.pmdm_pokedex_composable.controler.NavControllerManager
 import com.example.pmdm_pokedex_composable.controler.PokemonDataController
 import com.example.pmdm_pokedex_composable.model.data_classes.pokeApiService
 
@@ -80,25 +82,14 @@ fun GreetingPreview() {
 
 @Composable
 fun MainPanel() {
-    val systemUiController = rememberSystemUiController()
+    setUIColors(darkenColor(MaterialTheme.colorScheme.primary, 0.2f))
 
-    // Determina si el color de fondo es claro u oscuro
-    val isStatusBarLight = MaterialTheme.colorScheme.background.luminance() > 0.5
-    val isNavBarLight = MaterialTheme.colorScheme.surface.luminance() > 0.5
-
-    // Configurar colores de la barra de estado y navegación
-    systemUiController.setStatusBarColor(
-        color = MaterialTheme.colorScheme.background,
-        darkIcons = isStatusBarLight
-    )
-    systemUiController.setNavigationBarColor(
-        color = MaterialTheme.colorScheme.surface,
-        darkIcons = isNavBarLight
-    )
-
-    val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val pokemonDataController =  PokemonDataController.getInstance(pokeApiService)
+
+    val navController = rememberNavController()
+    NavControllerManager.setNavController(navController)
+
 
     Box(
         modifier = Modifier
@@ -116,7 +107,6 @@ fun MainPanel() {
                     composable("Pokedex") {
                         Pokedex(
                             drawerState = drawerState,
-                            navController = navController,
                             pokemonDataController =  pokemonDataController
                         )
                     }
@@ -266,14 +256,14 @@ fun SearchBarPokemon(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchBarMoves(
-    list: List<MovesData>, // Lista de Pokémon para filtrar
-    card: @Composable (MovesData) -> Unit, // Función composable que toma un Pokémon y lo muestra
+    list: List<String>, // Lista de Pokémon para filtrar
+    card: @Composable (String) -> Unit, // Función composable que toma un Pokémon y lo muestra
 ) {
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var isSearchBarActive by rememberSaveable { mutableStateOf(false) }
 
     // Filtrar los resultados según el texto de búsqueda
-    val filteredList = list.filter { it.name.contains(searchQuery, ignoreCase = true) }
+    val filteredList = list.filter { it.contains(searchQuery, ignoreCase = true) }
 
     Box(Modifier.fillMaxSize()) {
         // Barra de búsqueda
@@ -339,5 +329,26 @@ fun TopBar(
             containerColor = MaterialTheme.colorScheme.primary,
             titleContentColor = MaterialTheme.colorScheme.onPrimary
         )
+    )
+}
+
+@Composable
+fun setUIColors(
+    color: Color
+){
+    val systemUiController = rememberSystemUiController()
+
+    // Determina si el color de fondo es claro u oscuro
+    val isStatusBarLight = MaterialTheme.colorScheme.background.luminance() > 0.5
+    val isNavBarLight = MaterialTheme.colorScheme.surface.luminance() > 0.5
+
+    // Configurar colores de la barra de estado y navegación
+    systemUiController.setStatusBarColor(
+        color = color,
+        darkIcons = isStatusBarLight
+    )
+    systemUiController.setNavigationBarColor(
+        color = color,
+        darkIcons = isNavBarLight
     )
 }
