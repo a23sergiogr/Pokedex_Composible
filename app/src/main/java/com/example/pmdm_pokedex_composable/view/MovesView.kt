@@ -38,8 +38,6 @@ fun PreviewMoves(){
 //            "Steals 1/2 of the damage inflicted",
 //            "Inflicts regular damage. Drains half the damage inflicted to heal the user"
 //        )
-
-
         BottomSheetWithMoves()
     }
 }

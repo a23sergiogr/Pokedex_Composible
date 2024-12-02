@@ -1,5 +1,6 @@
 package com.example.pmdm_pokedex_composable.view
 
+import android.content.res.Resources.Theme
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -29,7 +30,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
@@ -43,32 +43,47 @@ import com.example.pmdm_pokedex_composable.R
 import com.example.pmdm_pokedex_composable.model.data_classes.PokeApiService
 import com.example.pmdm_pokedex_composable.model.data_classes.Pokedex
 import com.example.pmdm_pokedex_composable.model.data_classes.Pokemon
-import com.example.pmdm_pokedex_composable.model.data_classes.Sprites
-import com.example.pmdm_pokedex_composable.model.data_classes.pokeApiService
-import androidx.compose.material3.Icon
 import androidx.compose.material.icons.filled.Add
-
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.ui.text.toUpperCase
+import com.example.pmdm_pokedex_composable.controler.PokemonDataController
+import com.example.pmdm_pokedex_composable.model.data_classes.Species
+import java.util.Locale
 
 
 @Composable
 fun Pokedex(
     drawerState: DrawerState,
     navController: NavHostController,
-    pokeApiService: PokeApiService
+    pokemonDataController: PokemonDataController
 ) {
-    val pokemonEntries = remember { mutableStateOf<List<Pokedex.PokemonEntries>>(emptyList()) }
+    val pokemonList = remember { mutableStateListOf<PokemonCardData>() }
     val loading = remember { mutableStateOf(true) }
+    var pokedex: Pokedex
 
     LaunchedEffect(Unit) {
         try {
-            val pokedex = pokeApiService.getPokedex(1) // 1 Obtiene la Pokedex Nacional
-            pokemonEntries.value = pokedex.pokemonEntries
             loading.value = false
+
+            pokedex = pokemonDataController.getPokedex()
+
+            pokedex.pokemonEntries.forEach {
+                pokemonList.add(
+                    PokemonCardData(
+                        name = it.pokemonSpecies.name,
+                        id = it.entryNumber.toString(),
+                    )
+                )
+            }
+
+            loading.value = true
+
         } catch (e: Exception) {
-            println("Error al obtener datos: ${e.message}")
             loading.value = false
         }
     }
+
+
 
     Scaffold(
         topBar = {
@@ -84,14 +99,14 @@ fun Pokedex(
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
-            SearchBarSample(
-                list = pokemonEntries.value.map { it.pokemonSpecies.name },
-                contentBelowSearchBar = {
-                    if (loading.value) {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                    } else {
-                        CardListPokedex(navController, pokemonEntries.value, pokeApiService)
-                    }
+            SearchBarCardSample(
+                list = pokemonList, // lista de objetos Pokemon
+                card = { pokemon ->
+                    PokedexCard(
+                        pokemonCardData = pokemon,
+                        pokemonDataController = pokemonDataController,
+                        navController = navController
+                    )
                 }
             )
         }
@@ -99,70 +114,46 @@ fun Pokedex(
 }
 
 @Composable
-fun CardListPokedex(
-    navController: NavHostController,
-    pokemonEntries: List<Pokedex.PokemonEntries>,
-    pokeApiService: PokeApiService
+fun PokedexCard(
+    pokemonCardData: PokemonCardData,
+    pokemonDataController: PokemonDataController,
+    navController: NavHostController
 ) {
-    // Mostramos la lista de Pokémon usando LazyColumn
-    LazyColumn(Modifier.background(MaterialTheme.colorScheme.background)) {
-        items(pokemonEntries) { entry ->
-            val pokemon = remember { mutableStateOf<Pokemon?>(null) }
+    // Estado de carga y pokemon
+    val loading = remember { mutableStateOf(true) }
+    val pokemon = remember { mutableStateOf<Pokemon?>(null) }
 
-            LaunchedEffect(entry.pokemonSpecies.name) {
-                try {
-                    val pokemonData = pokeApiService.getPokemon(entry.pokemonSpecies.name)
-                    pokemon.value = pokemonData
-                } catch (e: Exception) {
-                    println("Error al obtener datos: ${e.message}")
-                }
-            }
+    // Llamada asíncrona
+    LaunchedEffect(pokemonCardData.name) {
+        try {
+            loading.value = true
 
-            if (pokemon.value != null) {
-                val sprites = pokemon.value?.sprites
-                val pokemonImage = sprites?.normalSprites?.get(0)
+            // Simula la llamada para obtener los datos del Pokémon
+            pokemon.value = pokemonDataController.getPokemon(pokemonCardData.name)
 
-                PokedexCard(
-                    name = entry.pokemonSpecies.name,
-                    id = pokemon.value?.id.toString(),
-                    pokemonImage = (pokemonImage ?: painterResource(R.drawable.error_unown)).toString(), // Imagen por defecto en caso de error
-                    imgType01 = painterResource(R.drawable.type_grass),
-                    imgType02 = painterResource(R.drawable.type_poison),
-                    onClick = { navController.navigate("PokemonView") }
-                )
-            } else {
-                CircularProgressIndicator()
-            }
+            loading.value = false
+        } catch (e: Exception) {
+            loading.value = false
         }
     }
-}
 
-
-
-/**
- * Representa una tarjeta de información de un Pokémon.
- *
- * Esta tarjeta contiene:
- * - Nombre del Pokémon.
- * - ID del Pokémon.
- * - Imagen del Pokémon.
- * - Hasta dos imágenes de tipos (opcional el segundo tipo).
- */
-@Composable
-fun PokedexCard(
-    name: String,
-    id: String,
-    pokemonImage: String,
-    imgType01: Painter,
-    imgType02: Painter?,
-    onClick: @Composable () -> Unit
-) {
-    // Obtén los colores del tema actual
+    // Colores del tema
     val textColor = MaterialTheme.colorScheme.onPrimary
     val primaryColor = MaterialTheme.colorScheme.primary
 
+    // Cargo datos de los pokemons
+    val types =  pokemon.value?.types
+    val typeOne = if (!types.isNullOrEmpty() && types.isNotEmpty()) types[0].name else null
+    val typeTwo = if (!types.isNullOrEmpty() && types.size > 1) types[1].name else null
+
+    val typeOneCard = getTypeCardSafe(typeOne)
+    val typeTwoCard = getTypeCardSafe(typeTwo)
+
+    val image = pokemon.value?.sprites?.normalSprites?.get(0) ?: ""
+
+
     val painter = rememberImagePainter(
-        pokemonImage,
+        image,
         builder = {
             crossfade(true)
             placeholder(R.drawable.placeholder_ditto)
@@ -170,9 +161,10 @@ fun PokedexCard(
         }
     )
 
-
     ElevatedCard(
-        onClick = {onClick},
+        onClick = {
+            navController.navigate("PokemonView/${pokemonCardData.id}")
+        },
         elevation = CardDefaults.cardElevation(
             defaultElevation = 6.dp
         ),
@@ -204,7 +196,7 @@ fun PokedexCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = name,
+                        text = pokemonCardData.name.replaceFirstChar { it.uppercase(Locale.getDefault()) },
                         modifier = Modifier
                             .padding(0.dp, 0.dp, 2.dp, 0.dp),
                         fontSize = 16.sp,
@@ -212,7 +204,7 @@ fun PokedexCard(
                         color = textColor // Usar color primario del tema
                     )
                     Text(
-                        text = id,
+                        text = pokemonCardData.id,
                         modifier = Modifier
                             .padding(0.dp, 0.dp, 2.dp, 0.dp),
                         fontSize = 16.sp,
@@ -225,36 +217,22 @@ fun PokedexCard(
                         modifier = Modifier.width(24.dp)
                     )
                 }
-
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 4.dp),
+                        .padding(top = 6.dp),
                     horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Image(
-                        painter = imgType01,
-                        contentDescription = "type01",
-                        modifier = Modifier
-                            .padding(0.dp, 0.dp, 10.dp, 0.dp)
-                            .size(80.dp)
-                    )
-                    if (imgType02 != null) {
-                        Image(
-                            painter = imgType02,
-                            contentDescription = "type02",
-                            modifier = Modifier
-                                .padding(0.dp, 0.dp, 10.dp, 0.dp)
-                                .size(80.dp)
-                        )
-                    }
+                    typeOneCard.invoke()
+                    typeTwoCard.invoke()
                 }
             }
 
+            // Mostrar la imagen del pokemon cargado
             Image(
                 painter = painter,
-                contentDescription = name,
+                contentDescription = pokemonCardData.name,
                 modifier = Modifier
                     .padding(8.dp)
                     .size(80.dp)
@@ -263,3 +241,9 @@ fun PokedexCard(
         }
     }
 }
+
+
+data class PokemonCardData(
+    val name: String,
+    val id: String,
+)

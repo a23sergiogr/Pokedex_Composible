@@ -4,7 +4,7 @@ import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
 import com.example.pmdm_pokedex_composable.model.data_classes.Pokedex
-import data_classes.urlclasses.NamedURLs
+import com.example.pmdm_pokedex_composable.model.data_classes.urlclasses.NamedURLs
 import java.lang.reflect.Type
 
 class GsonDeserializerPokedex : JsonDeserializer<Pokedex> {

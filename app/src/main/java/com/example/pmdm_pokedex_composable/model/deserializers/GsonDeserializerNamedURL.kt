@@ -3,7 +3,7 @@ package com.example.pmdm_pokedex_composable.model.deserializers
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
-import data_classes.urlclasses.NamedURLs
+import com.example.pmdm_pokedex_composable.model.data_classes.urlclasses.NamedURLs
 import java.lang.reflect.Type
 
 class GsonDeserializerNamedURL: JsonDeserializer<NamedURLs> {
@@ -11,7 +11,7 @@ class GsonDeserializerNamedURL: JsonDeserializer<NamedURLs> {
         json: JsonElement,
         typeOfT: Type,
         context: JsonDeserializationContext
-    ): NamedURLs  {
+    ): NamedURLs {
         val jsonObject = json.asJsonObject
         return NamedURLs(
             jsonObject.get("name").asString,

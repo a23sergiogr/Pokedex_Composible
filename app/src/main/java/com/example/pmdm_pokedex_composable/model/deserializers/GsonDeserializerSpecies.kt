@@ -2,7 +2,7 @@ package com.example.pmdm_pokedex_composable.model.deserializers
 
 import com.google.gson.*
 import com.example.pmdm_pokedex_composable.model.data_classes.Species
-import data_classes.urlclasses.NamedURLs
+import com.example.pmdm_pokedex_composable.model.data_classes.urlclasses.NamedURLs
 import java.lang.reflect.Type
 
 class GsonDeserializerSpecies: JsonDeserializer<Species> {
