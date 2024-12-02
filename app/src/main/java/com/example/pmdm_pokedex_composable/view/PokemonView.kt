@@ -2,6 +2,7 @@ package com.example.pmdm_pokedex_composable.view
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,20 +33,33 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoGraph
+import androidx.compose.material.icons.filled.Extension
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import coil.compose.rememberImagePainter
 import com.example.pmdm_pokedex_composable.R
 import com.example.pmdm_pokedex_composable.controler.PokemonDataController
+import com.example.pmdm_pokedex_composable.model.data_classes.EvolutionChain
 import com.example.pmdm_pokedex_composable.model.data_classes.Pokemon
 import com.example.pmdm_pokedex_composable.model.data_classes.Species
 import com.example.pmdm_pokedex_composable.model.data_classes.Sprites
 import com.example.pmdm_pokedex_composable.model.data_classes.pokeApiService
+import com.example.pmdm_pokedex_composable.model.data_classes.urlclasses.NamedURLs
 import com.google.accompanist.pager.*
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -54,21 +68,49 @@ import java.util.Locale
 fun PokemonView(
     pokemonId: String?
 ){
-
-    // Estado de carga y pokemon
     val loading = remember { mutableStateOf(true) }
     val pokemon = remember { mutableStateOf<Pokemon?>(null) }
     val specie = remember { mutableStateOf<Species?>(null) }
+    val evolutionChain = remember { mutableStateOf<EvolutionChain?>(null) }
+    val evolutionImages = remember { mutableStateOf<List<Evolution>>(emptyList()) } // Para almacenar las imágenes de la cadena evolutiva
     val pokemonDataController = PokemonDataController.getInstance(pokeApiService)
 
-    // Llamada asíncrona
+// Llamada asíncrona
     LaunchedEffect(pokemonId) {
         try {
             loading.value = true
-
             // Simula la llamada para obtener los datos del Pokémon
             pokemon.value = pokemonId?.let { pokemonDataController.getPokemon(it) }
             specie.value = pokemonId?.let { pokemonDataController.getSpecies(it) }
+
+            // Obtener la cadena evolutiva
+            evolutionChain.value = specie.value?.evolutionChainURL?.let {
+                pokemonDataController.getEvolutionChain(it)
+            } ?: EvolutionChain(listOf(NamedURLs("error", "error")))
+
+            // Ahora obtenemos las imágenes de la cadena evolutiva usando los nombres
+            val pokemonNames = evolutionChain.value?.evolutionChain?.map { it.name } ?: emptyList()
+
+            val images = pokemonNames.mapNotNull { name ->
+                try {
+                    // Obtener el Pokémon desde el nombre y extraer el sprite
+                    val evolutionPokemon = pokemonDataController.getPokemon(name)
+
+                    // Verificamos que la propiedad sprites y normalSprites no sean nulas
+                    val spriteUrl = evolutionPokemon?.sprites?.normalSprites?.get(0)
+                    if (spriteUrl != null) {
+                        // Crear un objeto Evolution con el nombre y la URL de la imagen
+                        Evolution(name = name, imgUrl = spriteUrl)
+                    } else {
+                        null
+                    }
+                } catch (e: Exception) {
+                    // Si hay un error al obtener los datos o procesarlos, simplemente lo ignoramos y retornamos null
+                    null
+                }
+            }
+
+            evolutionImages.value = images // Guardar las imágenes en la lista de evoluciones
 
             loading.value = false
         } catch (e: Exception) {
@@ -76,8 +118,8 @@ fun PokemonView(
         }
     }
 
-    // Cargo datos de los pokemons
-    val types =  pokemon.value?.types
+// Cargo datos de los pokemons
+    val types = pokemon.value?.types
     val typeOne = if (!types.isNullOrEmpty() && types.isNotEmpty()) types[0].name else null
     val typeTwo = if (!types.isNullOrEmpty() && types.size > 1) types[1].name else null
 
@@ -92,18 +134,44 @@ fun PokemonView(
 
     val description = (specie.value?.flavorText?.get(0) ?: "N/A").toString().replace("\n", " ")
 
+    val color = Color(PokemonColor.fromName(specie.value?.color.toString())?.hexCode ?: PokemonColor.NULL.hexCode)
+    val textColor = darkenColor(color, 0.8f)
+
+    val systemUiController = rememberSystemUiController()
+
+    val isStatusBarLight = MaterialTheme.colorScheme.background.luminance() > 0.5
+    val isNavBarLight = MaterialTheme.colorScheme.surface.luminance() > 0.5
+
+// Configurar colores de la barra de estado y navegación
+    systemUiController.setStatusBarColor(
+        color = darkenColor(color, 0.2f),
+        darkIcons = isStatusBarLight
+    )
+    systemUiController.setNavigationBarColor(
+        color = darkenColor(color, 0.2f),
+        darkIcons = isNavBarLight
+    )
+
 
     Column (
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
+            .background(
+                brush = Brush.linearGradient(
+                    colors = listOf(
+                        color,
+                        tranparentColor(color)
+                    )
+            ))
     ){
         TopView(
             name = (pokemon.value?.name ?: "unown").replaceFirstChar { it.uppercase(Locale.getDefault()) },
             id = (pokemon.value?.id ?: -9999).toString(),
             sprites = pokemon.value?.sprites,
             typeOneCard = typeOneCard,
-            typeTwoCard = typeTwoCard
+            typeTwoCard = typeTwoCard,
+            textColor = textColor
         )
         InfoSlider(
             listOf(
@@ -112,10 +180,9 @@ fun PokemonView(
                         weight = formattedWeight,
                         height = formattedHeight,
                         description = description,
-                        listOf(
-                            painterResource(R.drawable.bulbasaur),
-                            painterResource(R.drawable.bulbasaur),
-                            painterResource(R.drawable.bulbasaur)))
+                        evolutionImages.value,
+                        textColor = textColor,
+                    )
                 },
                 {
                     Estadisticas(
@@ -128,7 +195,8 @@ fun PokemonView(
                         "305"
                     )
                 }
-            )
+            ),
+            color = color
         )
     }
 }
@@ -139,16 +207,14 @@ fun TopView(
     id: String,
     sprites: Sprites?,
     typeOneCard: @Composable () -> Unit,
-    typeTwoCard: @Composable () -> Unit?
+    typeTwoCard: @Composable () -> Unit?,
+    textColor: Color
 ) {
-    // Obtén los colores del tema actual
-    val textColor = MaterialTheme.colorScheme.onPrimary
-    val primaryColor = MaterialTheme.colorScheme.primary
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.primary)
+            .background(Color.Transparent)
     ) {
         Column(
             modifier = Modifier
@@ -202,15 +268,7 @@ fun TopView(
                         contentDescription = "stars",
                         modifier = Modifier
                             .width(28.dp)
-                            .padding(end = 5.dp)
-                    )
-
-                    Image(
-                        painter = painterResource(R.drawable.stars_shiny),
-                        contentDescription = "stars",
-                        modifier = Modifier
-                            .width(28.dp)
-                            .padding(5.dp, 0.dp, 0.dp, 0.dp)
+                            .padding(5.dp, 0.dp, 0.dp, 0.dp),
                     )
                 }
 
@@ -218,22 +276,11 @@ fun TopView(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(300.dp)
+                    .height(250.dp)
             ) {
-                ElevatedCard(
-                    elevation = CardDefaults.cardElevation(
-                        defaultElevation = 6.dp
-                    ),
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    colors = CardDefaults.elevatedCardColors(
-                        containerColor = primaryColor
-                    )
-                ) {
-                    ImageSlider(
-                        images = sprites?.normalSprites ?: listOf("")
-                    )
-                }
+                ImageSlider(
+                    images = sprites?.normalSprites ?: listOf("")
+                )
             }
         }
     }
@@ -246,76 +293,58 @@ fun ImageSlider(
     val pagerState = rememberPagerState()
     Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .height(250.dp)
-            .background(MaterialTheme.colorScheme.primary)
+            .fillMaxSize()
+            .background(Color.Transparent)
     ) {
-        ElevatedCard(
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 6.dp
-            ),
+        HorizontalPager(
+            count = images.size,
+            state = pagerState,
             modifier = Modifier
-                .fillMaxWidth()
-                .height(250.dp),
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.secondary
-            )
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.secondary)
-            ) {
-                HorizontalPager(
-                    count = images.size,
-                    state = pagerState,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.secondary)
-                ) { page ->
+                .fillMaxSize()
+                .background(Color.Transparent)
+        ) { page ->
 
-                    val painter = rememberImagePainter(
-                        images[page],
-                        builder = {
-                            crossfade(true)
-                            placeholder(R.drawable.placeholder_ditto)
-                            error(R.drawable.error_unown)
-                        }
-                    )
-
-                    Image(
-                        painter = painter,
-                        contentDescription = "Image ${page + 1}",
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .fillMaxSize()
-                    )
+            val painter = rememberImagePainter(
+                images[page],
+                builder = {
+                    crossfade(true)
+                    placeholder(R.drawable.placeholder_ditto)
+                    error(R.drawable.error_unown)
                 }
-            }
+            )
+
+            Image(
+                painter = painter,
+                contentDescription = "Image ${page + 1}",
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxSize()
+            )
         }
     }
 }
 
 @Composable
 fun InfoSlider(
-    views: List<@Composable () -> Unit>
+    views: List<@Composable () -> Unit>,
+    color: Color
 ) {
     val coroutineScope = rememberCoroutineScope()
     val pagerState = rememberPagerState()
     val iconRes = listOf(
-        R.drawable.icon_info,
-        R.drawable.icon_sword,
-        R.drawable.icon_graph,
-        R.drawable.icon_plus
+        Icons.Default.Info,
+        Icons.Default.Shield,
+        Icons.Default.AutoGraph,
+        Icons.Default.Extension
     )
 
     Column {
-        // Indicadores con íconos
+        // Fila de íconos con bordes y brillo en el ícono seleccionado
         Row(
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.background)
+                .background(Color.Transparent)
         ) {
             iconRes.forEachIndexed { index, iconRes ->
                 IconButton(
@@ -324,35 +353,60 @@ fun InfoSlider(
                             pagerState.animateScrollToPage(index)
                         }
                     },
-                    modifier = Modifier.padding(8.dp)
+                    modifier = Modifier
+                        .padding(8.dp) // Espaciado entre los íconos
+                        .clip(CircleShape) // Hacer los íconos circulares
+                        .background(
+                            color = if (pagerState.currentPage == index) {
+                                darkenColor(color.copy(alpha = 0.6f), 0.2f)
+                            } else {
+                                lightenColor(color.copy(alpha = 0.8f), 0.2f)
+                            },
+                            shape = CircleShape
+                        )
+                        .border(
+                            width = 2.dp,
+                            color = if (pagerState.currentPage == index) {
+                                darkenColor(color.copy(alpha = 0.6f), 0.2f)
+                            } else {
+                                lightenColor(color.copy(alpha = 0.6f), 0.2f)
+                            },
+                            shape = CircleShape
+                        )
+                        .shadow(
+                            elevation = 8.dp,
+                            shape = CircleShape,
+                            ambientColor = color.copy(alpha = 0.2f),
+                            spotColor = color.copy(alpha = 0.4f)
+                        )
                 ) {
-                    Image(
-                        painter = painterResource(iconRes),
+                    Icon(
+                        imageVector = iconRes,
                         contentDescription = "Page $index",
                         modifier = Modifier
-                            .size(40.dp) // Ajusta el tamaño del ícono
-                            .background(
-                                color = if (pagerState.currentPage == index) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
-                                shape = CircleShape
-                            )
-                            .padding(8.dp) // Espaciado interno opcional
+                            .size(40.dp) // Tamaño del ícono
+                            .padding(8.dp) // Espaciado interno
                     )
                 }
             }
         }
 
+        // Caja para mostrar las vistas de la página
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 16.dp) // Ajuste para no solapar el contenido
         ) {
             HorizontalPager(
                 count = views.size,
                 state = pagerState
             ) { page ->
-                views[page]()
+                views[page]() // Mostrar la vista de cada página
             }
         }
     }
 }
+
 
 
 @Composable
@@ -360,19 +414,21 @@ fun BasicInfo(
     weight: String,
     height: String,
     description: String,
-    evolutions: List<Painter>){
+    evolutions: List<Evolution>,
+    textColor: Color
+    ){
     Column (
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.primary)
+            .background(Color.Transparent)
             .fillMaxSize()
     ){
         Text(
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = textColor,
             modifier = Modifier.padding(12.dp),
             text = "Descripción",
         )
         Text(
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = textColor,
             modifier = Modifier.padding(12.dp),
             text = description
         )
@@ -430,22 +486,32 @@ fun BasicInfo(
         ) {
             LazyRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center // Alinea los elementos horizontalmente en el centro
+                horizontalArrangement = Arrangement.Center
             ) {
                 items(evolutions.size) { i ->
+
+                    val painter = rememberImagePainter(
+                        evolutions[i].imgUrl,
+                        builder = {
+                            crossfade(true)
+                            placeholder(R.drawable.placeholder_ditto)
+                            error(R.drawable.error_unown)
+                        }
+                    )
+
                     Column(
                         modifier = Modifier.padding(8.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally // Alinea el contenido dentro de cada columna al centro
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Image(
-                            painter = evolutions[i],
+                            painter = painter,
                             contentDescription = "Evolution",
                             modifier = Modifier
                                 .padding(12.dp)
-                                .height(52.dp)
+                                .size(72.dp)
                         )
                         Text(
-                            text = "[nombrePokemon?]",
+                            text = evolutions[i].name.replaceFirstChar { it.uppercase(Locale.getDefault()) },
                             modifier = Modifier.padding(top = 4.dp),
                             fontSize = 12.sp
                         )
@@ -457,55 +523,7 @@ fun BasicInfo(
 }
 
 
-
-//@Preview(showBackground = true)
-//@Composable
-//fun Preview() {
-//    PMDM_Pokedex_ComposableTheme {
-//        Column (
-//            modifier = Modifier
-//                .fillMaxSize()
-//        ){
-//            TopView(
-//                name = "Bulbasaur",
-//                id = "#$001",
-//                pokemonImage = painterResource(R.drawable.bulbasaur),
-//                imgType01 = painterResource(R.drawable.type_grass),
-//                imgType02 = painterResource(R.drawable.type_poison)
-//            )
-//
-//            Column (
-//                modifier = Modifier
-//                    .fillMaxSize()
-//                    .verticalScroll(rememberScrollState())
-//            ){
-//                ImageSlider(listOf(painterResource(R.drawable.bulbasaur),painterResource(R.drawable.type_poison), painterResource(R.drawable.type_grass)),)
-//
-//                InfoSlider(
-//                    listOf(
-//                        {
-//                            BasicInfo(
-//                                "123",
-//                                "321",
-//                                listOf(
-//                                    painterResource(R.drawable.bulbasaur),
-//                                    painterResource(R.drawable.bulbasaur),
-//                                    painterResource(R.drawable.bulbasaur)))
-//                        },
-//                        {
-//                            Estadisticas(
-//                                "45",
-//                                "49",
-//                                "49",
-//                                "65",
-//                                "65",
-//                                "40",
-//                                "305"
-//                            )
-//                        }
-//                    )
-//                )
-//            }
-//        }
-//    }
-//}
+data class Evolution(
+    val name: String,
+    val imgUrl: String
+)

@@ -122,12 +122,6 @@ fun StatusCard() {
     }
 }
 
-
-@Composable
-fun CardGrassType(){
-    TypeCard(PokemonType.GRASS, "Grass")
-}
-
 @Composable
 private fun TypeCard(baseColor: PokemonType, type: String) {
     ElevatedCard(
@@ -135,7 +129,7 @@ private fun TypeCard(baseColor: PokemonType, type: String) {
             .padding(end = 4.dp)
             .border(
                 width = 2.dp,
-                color = baseColor.color,
+                color = darkenColor(Color(baseColor.color.value), 0.2f),
                 shape = RoundedCornerShape(12.dp)
             ),
         colors = CardDefaults.elevatedCardColors(

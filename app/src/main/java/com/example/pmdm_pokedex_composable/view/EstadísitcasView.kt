@@ -37,9 +37,22 @@ fun Estadisticas(
     speed: String,
     total: String
 ) {
+    // Convertimos las estadísticas a valores numéricos
+    val stats = listOf(
+        ps.toFloatOrNull() ?: 0f,
+        attack.toFloatOrNull() ?: 0f,
+        defence.toFloatOrNull() ?: 0f,
+        spaAttack.toFloatOrNull() ?: 0f,
+        spaDefence.toFloatOrNull() ?: 0f,
+        speed.toFloatOrNull() ?: 0f
+    )
+
+    // Encontrar la estadística más alta
+    val maxStat = stats.maxOrNull() ?: 1f // Para evitar dividir por 0, usamos un valor por defecto de 1f
+
     Box(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.background)
+            .background(Color.Transparent)
             .fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
@@ -51,84 +64,62 @@ fun Estadisticas(
         ) {
             Text(
                 text = "Estadísticas",
-                fontWeight = FontWeight(1000)
+                fontWeight = FontWeight.Bold
             )
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding( horizontal = 24.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                EstadisticasCard("Base", {})
-                EstadisticasCard("Min", {})
-                EstadisticasCard("Max", {})
-            }
+//            Row(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(horizontal = 24.dp, vertical = 12.dp),
+//                horizontalArrangement = Arrangement.SpaceBetween
+//            ) {
+//                EstadisticasCard("Base", {})
+//                EstadisticasCard("Min", {})
+//                EstadisticasCard("Max", {})
+//            }
+
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
+                // Nombres de las estadísticas
                 Column(
                     modifier = Modifier.padding(12.dp)
-                ){
-                    Text(
-                        text = "PS",
-                        modifier = Modifier
-                            .padding( vertical = 4.dp),
-                        textAlign = TextAlign.Center
-                    )
+                ) {
+                    listOf(
+                        "PS", "Attack", "Defence", "Spa. Attack", "Spa. Defence", "Speed"
+                    ).forEach { text ->
+                        Text(
+                            text = text,
+                            modifier = Modifier
+                                .padding(vertical = 4.dp),
+                            textAlign = TextAlign.Center
+                        )
+                    }
 
-                    Text(
-                        text = "Attack",
-                        modifier = Modifier
-                            .padding( vertical = 4.dp),
-                        textAlign = TextAlign.Center
-                    )
-
-                    Text(
-                        text = "Defence",
-                        modifier = Modifier
-                            .padding( vertical = 4.dp),
-                        textAlign = TextAlign.Center
-                    )
-
-                    Text(
-                        text = "Spa. Attack",
-                        modifier = Modifier
-                            .padding( vertical = 4.dp),
-                        textAlign = TextAlign.Center
-                    )
-
-                    Text(
-                        text = "Spa. Defence",
-                        modifier = Modifier
-                            .padding( vertical = 4.dp),
-                        textAlign = TextAlign.Center
-                    )
-
-                    Text(
-                        text = "Speed",
-                        modifier = Modifier
-                            .padding( vertical = 4.dp),
-                        textAlign = TextAlign.Center
-                    )
-
+                    // Mostrar el Total como solo número
                     Text(
                         text = "Total",
                         modifier = Modifier
-                            .padding( vertical = 4.dp),
+                            .padding(vertical = 4.dp),
                         textAlign = TextAlign.Center
                     )
                 }
+
+                // Barras de progreso con tamaños proporcionales, sin barra para Total
                 Column(
                     modifier = Modifier.padding(12.dp)
-                ){
-                    ProgressBar(0.50f, ps)
-                    ProgressBar(0.35f, attack)
-                    ProgressBar(0.60f, defence)
-                    ProgressBar(0.55f, spaAttack)
-                    ProgressBar(0.80f, spaDefence)
-                    ProgressBar(0.45f, speed)
-                    ProgressBar(0.55f, total)
+                ) {
+                    stats.forEach { stat ->
+                        ProgressBar(stat / maxStat, stat.toString())
+                    }
+
+                    // Mostrar el Total solo como número
+                    Text(
+                        text = total,
+                        modifier = Modifier
+                            .padding(vertical = 4.dp),
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
         }
@@ -136,18 +127,18 @@ fun Estadisticas(
 }
 
 @Composable
-fun EstadisticasCard(text: String, onClick: () -> Unit){
+fun EstadisticasCard(text: String, onClick: () -> Unit) {
     ElevatedCard(
         modifier = Modifier
             .width(80.dp)
             .border(
                 width = 2.dp,
-                color = Color(0xFFF9A825),
+                color = MaterialTheme.colorScheme.secondary,
                 shape = RoundedCornerShape(8.dp)
             )
             .clickable { onClick() },
         colors = CardDefaults.elevatedCardColors(
-            containerColor = Color(0xFFFFF59D)
+            containerColor = lightenColor(MaterialTheme.colorScheme.secondary, 0.4f)
         ),
     ) {
         Text(
@@ -155,7 +146,8 @@ fun EstadisticasCard(text: String, onClick: () -> Unit){
             modifier = Modifier
                 .padding(4.dp)
                 .fillMaxWidth(),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSecondary
         )
     }
 }
@@ -164,18 +156,18 @@ fun EstadisticasCard(text: String, onClick: () -> Unit){
 fun ProgressBar(progress: Float, number: String) {
     Box(
         modifier = Modifier
-            .padding( vertical = 6.dp)
+            .padding(vertical = 6.dp)
             .padding(start = 26.dp)
             .height(20.dp)
             .width(150.dp)
-            .background(Color(0xFF3949AB), shape = RoundedCornerShape(16.dp)) // Fondo de la barra
+            .background(MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(16.dp)) // Fondo de la barra
     ) {
         Box(
             modifier = Modifier
                 .height(20.dp)
-                .width((150*progress).dp)
-                .background(Color(0xFFF9A825), shape = RoundedCornerShape(16.dp)) // Progreso
-        ){
+                .width((150 * progress).dp)
+                .background(MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(16.dp)) // Progreso
+        ) {
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -186,6 +178,7 @@ fun ProgressBar(progress: Float, number: String) {
         }
     }
 }
+
 
 @Preview
 @Composable

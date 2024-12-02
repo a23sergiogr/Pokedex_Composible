@@ -45,9 +45,11 @@ import com.example.pmdm_pokedex_composable.model.data_classes.Pokedex
 import com.example.pmdm_pokedex_composable.model.data_classes.Pokemon
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.toUpperCase
 import com.example.pmdm_pokedex_composable.controler.PokemonDataController
 import com.example.pmdm_pokedex_composable.model.data_classes.Species
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import java.util.Locale
 
 
@@ -83,6 +85,21 @@ fun Pokedex(
         }
     }
 
+    val systemUiController = rememberSystemUiController()
+
+    val isStatusBarLight = MaterialTheme.colorScheme.background.luminance() > 0.5
+    val isNavBarLight = MaterialTheme.colorScheme.surface.luminance() > 0.5
+
+// Configurar colores de la barra de estado y navegación
+    systemUiController.setStatusBarColor(
+        color = darkenColor(MaterialTheme.colorScheme.primary, 0.2f),
+        darkIcons = isStatusBarLight
+    )
+    systemUiController.setNavigationBarColor(
+        color = darkenColor(MaterialTheme.colorScheme.primary, 0.2f),
+        darkIcons = isNavBarLight
+    )
+
 
 
     Scaffold(
@@ -96,7 +113,7 @@ fun Pokedex(
                     }
                 }
             )
-        }
+        },
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             SearchBarCardSample(

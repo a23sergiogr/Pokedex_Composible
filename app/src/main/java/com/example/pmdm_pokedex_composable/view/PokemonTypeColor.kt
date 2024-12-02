@@ -23,6 +23,26 @@ enum class PokemonType(val color: Color) {
     FAIRY(Color(0xFFF0A0F0));     // Color para el tipo HADA
 }
 
+enum class PokemonColor(val hexCode: Long) {
+    BLACK(0xFF2D2D2D),  // Negro ligeramente más claro
+    BLUE(0xFF7BA1D1),   // Azul más claro
+    BROWN(0xFF8E7F6D),  // Marrón más claro
+    GRAY(0xFFB3B3B3),   // Gris más claro
+    GREEN(0xFF86C300),  // Verde más claro
+    PINK(0xFFF1B7A7),   // Rosa más claro
+    PURPLE(0xFF9E7DBA), // Púrpura más claro
+    RED(0xFFEC8A74),    // Rojo más claro
+    WHITE(0xFFDBDBDB),  // Blanco más claro
+    YELLOW(0xFFFFD15C), // Amarillo más claro
+    NULL(0xFFF);        // Valor por defecto
+
+    companion object {
+        fun fromName(name: String): PokemonColor? {
+            return values().find { it.name.equals(name, ignoreCase = true) }
+        }
+    }
+}
+
 
 fun lightenColor(color: Color, factor: Float): Color {
     // Extraemos los componentes del color
@@ -45,21 +65,12 @@ fun darkenColor(color: Color, factor: Float): Color {
     return Color(red, green, blue, alpha)
 }
 
-enum class PokemonColor(val hexCode: Long) {
-    BLACK(0xFF000000),
-    BLUE(0xFF0000FF),
-    BROWN(0xFFA52A2A),
-    GRAY(0xFF808080),
-    GREEN(0xFF008000),
-    PINK(0xFFFFC0CB),
-    PURPLE(0xFF800080),
-    RED(0xFFFF0000),
-    WHITE(0xFFFFFFFF),
-    YELLOW(0xFFFFFF00);
+fun tranparentColor(color: Color): Color {
+    // Extraemos los componentes del color
+    val red = color.red
+    val green = color.green
+    val blue = color.blue
+    val alpha = 0f
 
-    companion object {
-        fun fromName(name: String): PokemonColor? {
-            return values().find { it.name.equals(name, ignoreCase = true) }
-        }
-    }
+    return Color(red, green, blue, alpha)
 }
