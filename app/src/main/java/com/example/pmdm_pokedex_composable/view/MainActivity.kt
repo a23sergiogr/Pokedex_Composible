@@ -49,15 +49,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.pmdm_pokedex_composable.controler.PokemonDataController
-import com.example.pmdm_pokedex_composable.model.data_classes.Pokemon
 import com.example.pmdm_pokedex_composable.model.data_classes.pokeApiService
 
 
@@ -228,15 +225,15 @@ fun LateralMenu(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBarSample(
-    list: List<String>, // Lista sobre la que se hará la búsqueda
-    contentBelowSearchBar: @Composable () -> Unit // Contenido adicional debajo de la barra de búsqueda
+fun SearchBarPokemon(
+    list: List<PokemonCardData>, // Lista de Pokémon para filtrar
+    card: @Composable (PokemonCardData) -> Unit, // Función composable que toma un Pokémon y lo muestra
 ) {
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var isSearchBarActive by rememberSaveable { mutableStateOf(false) }
 
     // Filtrar los resultados según el texto de búsqueda
-    val filteredList = list.filter { it.contains(searchQuery, ignoreCase = true) }
+    val filteredList = list.filter { it.name.contains(searchQuery, ignoreCase = true) }
 
     Box(Modifier.fillMaxSize()) {
         // Barra de búsqueda
@@ -244,7 +241,7 @@ fun SearchBarSample(
             query = searchQuery,
             onQueryChange = { searchQuery = it },
             onSearch = { /* Acciones al confirmar la búsqueda */ },
-            active = isSearchBarActive,
+            active = true,
             onActiveChange = { isSearchBarActive = it },
             placeholder = { Text("Search Pokémon") },
             leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
@@ -253,30 +250,24 @@ fun SearchBarSample(
                 .align(Alignment.TopCenter)
                 .fillMaxWidth()
         ) {
-            // Mostrar los resultados filtrados
+
+            // LazyColumn dentro de SearchBar
             LazyColumn {
                 items(filteredList) { item ->
-                    Text(
-                        text = item,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                            .clickable { /* Acciones al seleccionar */ }
-                    )
+                    // Llamar a la función composable 'card' pasando cada 'item' de la lista
+                    card(item)
                 }
             }
         }
-
-        // Contenido adicional debajo de la barra de búsqueda
-        contentBelowSearchBar()
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBarCardSample(
-    list: List<PokemonCardData>, // Lista de Pokémon para filtrar
-    card: @Composable (PokemonCardData) -> Unit, // Función composable que toma un Pokémon y lo muestra
+fun SearchBarMoves(
+    list: List<MovesData>, // Lista de Pokémon para filtrar
+    card: @Composable (MovesData) -> Unit, // Función composable que toma un Pokémon y lo muestra
 ) {
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var isSearchBarActive by rememberSaveable { mutableStateOf(false) }

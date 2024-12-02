@@ -1,5 +1,6 @@
 package com.example.pmdm_pokedex_composable.model.data_classes
 
+import com.example.pmdm_pokedex_composable.model.data_classes.urlclasses.NamedURLs
 import com.example.pmdm_pokedex_composable.model.deserializers.GsonDeserializerEvolutionChain
 import com.example.pmdm_pokedex_composable.model.deserializers.GsonDeserializerPokedex
 import com.example.pmdm_pokedex_composable.model.deserializers.GsonDeserializerPokemon
@@ -38,6 +39,9 @@ interface PokeApiService {
 
     @GET("evolution-chain/{id}")
     suspend fun getEvolutionChain(@Path("id") id: String): EvolutionChain
+
+    @GET("move")
+    suspend fun getMovesList(): List<NamedURLs>
 }
 
 val retrofit = Retrofit.Builder()

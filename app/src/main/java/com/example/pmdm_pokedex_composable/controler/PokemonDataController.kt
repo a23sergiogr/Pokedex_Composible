@@ -1,11 +1,13 @@
 package com.example.pmdm_pokedex_composable.controler
 
 import com.example.pmdm_pokedex_composable.model.data_classes.EvolutionChain
+import com.example.pmdm_pokedex_composable.model.data_classes.Move
 import com.example.pmdm_pokedex_composable.model.data_classes.PokeApiService
 import com.example.pmdm_pokedex_composable.model.data_classes.Pokedex
 import com.example.pmdm_pokedex_composable.model.data_classes.Pokemon
 import com.example.pmdm_pokedex_composable.model.data_classes.Species
 import com.example.pmdm_pokedex_composable.model.data_classes.Sprites
+import com.example.pmdm_pokedex_composable.model.data_classes.urlclasses.NamedURLs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -45,12 +47,14 @@ class PokemonDataController private constructor(private val pokeApiService: Poke
         return pokeApiService.getEvolutionChain(extractIdFromUrl(url))
     }
 
+    suspend fun getMovesList(): List<NamedURLs>{
+        return pokeApiService.getMovesList();
+    }
+
     private fun extractIdFromUrl(url: String): String {
         val regex = """evolution-chain/(\d+)""".toRegex()
         val matchResult = regex.find(url)
         val result = matchResult?.groupValues?.get(1) ?: ""
         return  result // Si no encuentra el ID, devuelve -1
     }
-
-
 }
