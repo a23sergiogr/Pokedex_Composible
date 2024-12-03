@@ -7,8 +7,11 @@ import com.example.pmdm_pokedex_composable.model.data_classes.Pokedex
 import com.example.pmdm_pokedex_composable.model.data_classes.Pokemon
 import com.example.pmdm_pokedex_composable.model.data_classes.Species
 import com.example.pmdm_pokedex_composable.model.data_classes.Sprites
+import com.example.pmdm_pokedex_composable.model.data_classes.TypeRelations
 import com.example.pmdm_pokedex_composable.model.data_classes.urlclasses.NamedURLs
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 
 //Cambiar a Object
@@ -40,6 +43,7 @@ class PokemonDataController private constructor(private val pokeApiService: Poke
     }
 
     val BASE_URL = "https://pokeapi.co/api/v2/"
+    var cachedTypeRelations: TypeRelations? = null
 
     // Funciónes suspendidas que obtienen datos de la API
     suspend fun getPokedex(): Pokedex {
@@ -75,6 +79,21 @@ class PokemonDataController private constructor(private val pokeApiService: Poke
             pokeApiService.getMove(name)
     }
 
+    suspend fun getTypeRelations(): TypeRelations {
+        // Verificar si ya tenemos los datos almacenados
+        cachedTypeRelations?.let {
+            return it  // Si ya están en cache, los usamos directamente
+        }
+
+        val list = withContext(Dispatchers.IO) {
+            (1..19).map { i ->
+                async { pokeApiService.getRelationType(i.toString()) }
+            }.awaitAll()  // Esperar todas las tareas de manera concurrente
+        }
+
+        cachedTypeRelations = TypeRelations(list)
+        return cachedTypeRelations!!
+    }
 
 
     private fun extractIdFromUrl(url: String): String {

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,13 +22,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.pmdm_pokedex_composable.ui.theme.PMDM_Pokedex_ComposableTheme
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -42,6 +38,7 @@ import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -49,11 +46,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
-import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
+import androidx.compose.ui.platform.LocalContext
+import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
 import com.example.pmdm_pokedex_composable.R
 import com.example.pmdm_pokedex_composable.controler.NavControllerManager
 import com.example.pmdm_pokedex_composable.controler.PokemonDataController
@@ -64,7 +60,6 @@ import com.example.pmdm_pokedex_composable.model.data_classes.Sprites
 import com.example.pmdm_pokedex_composable.model.data_classes.pokeApiService
 import com.example.pmdm_pokedex_composable.model.data_classes.urlclasses.NamedURLs
 import com.google.accompanist.pager.*
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -141,6 +136,15 @@ fun PokemonView(
     val color = Color(PokemonColor.fromName(specie.value?.color.toString())?.hexCode ?: PokemonColor.NULL.hexCode)
     val textColor = darkenColor(color, 0.8f)
 
+    val ps = pokemon.value?.stats?.get(0)?.baseStat ?: -1
+    val attack = pokemon.value?.stats?.get(1)?.baseStat ?: -1
+    val defence = pokemon.value?.stats?.get(2)?.baseStat ?: -1
+    val spaAttack = pokemon.value?.stats?.get(3)?.baseStat ?: -1
+    val spaDefence = pokemon.value?.stats?.get(4)?.baseStat ?: -1
+    val speed = pokemon.value?.stats?.get(5)?.baseStat ?: -1
+
+    val total = ps + attack + defence + spaAttack + spaDefence + speed
+
     setUIColors(darkenColor(color, 0.2f))
 
 
@@ -162,7 +166,8 @@ fun PokemonView(
             sprites = pokemon.value?.sprites,
             typeOneCard = typeOneCard,
             typeTwoCard = typeTwoCard,
-            textColor = textColor
+            textColor = textColor,
+            pokemon = pokemon
         )
         InfoSlider(
             listOf(
@@ -175,18 +180,28 @@ fun PokemonView(
                         textColor = textColor,
                     )
                 },
-                {PokemonMovesView(pokemon.value?.moves ?: listOf(NamedURLs("tackle", "tackle")))},
+                {
+                    PokemonCombatView(
+                        types = listOf(typeOne.toString(), typeTwo.toString())
+                    )
+                },
                 {
                     Estadisticas(
-                        "45",
-                        "49",
-                        "49",
-                        "65",
-                        "65",
-                        "40",
-                        "305"
+                        ps = ps.toString(),
+                        attack = attack.toString(),
+                        defence = defence.toString(),
+                        spaAttack = spaAttack.toString(),
+                        spaDefence = spaDefence.toString(),
+                        speed = speed.toString(),
+                        total = total.toString(),
+                        textColor = textColor
                     )
-                }
+
+                },
+                { PokemonMoveList(
+                    movesList = pokemon.value?.moves ?: listOf(NamedURLs("tackle", "tackle")),
+                    )
+                },
             ),
             color = color
         )
@@ -200,9 +215,9 @@ fun TopView(
     sprites: Sprites?,
     typeOneCard: @Composable () -> Unit,
     typeTwoCard: @Composable () -> Unit?,
-    textColor: Color
+    textColor: Color,
+    pokemon: MutableState<Pokemon?>
 ) {
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -254,28 +269,40 @@ fun TopView(
                         modifier = Modifier
                             .width(75.dp)
                             .height(30.dp)
+                            .padding(end = 4.dp)
                             .align(Alignment.CenterVertically)
-                    ){
+                    ) {
                         typeOneCard.invoke()
                     }
+
                     Box(
                         modifier = Modifier
                             .width(75.dp)
                             .height(30.dp)
                             .align(Alignment.CenterVertically)
-                    ){
+                    ) {
                         typeTwoCard.invoke()
                     }
 
                     Spacer(modifier = Modifier.weight(1f))
 
-                    Image(
-                        painter = painterResource(R.drawable.stars_shiny),
-                        contentDescription = "stars",
+                    // Botón de sonido
+                    Box(
                         modifier = Modifier
-                            .width(28.dp)
-                            .padding(5.dp, 0.dp, 0.dp, 0.dp),
-                    )
+                            .align(Alignment.CenterVertically) // Asegura alineación vertical
+                    ) {
+                        PlaySoundButton(
+                            pokemon.value?.cries
+                                ?: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/legacy/132.ogg"
+                        )
+                    }
+//                    Image(
+//                        painter = painterResource(R.drawable.stars_shiny),
+//                        contentDescription = "stars",
+//                        modifier = Modifier
+//                            .width(28.dp)
+//                            .padding(5.dp, 0.dp, 0.dp, 0.dp),
+//                    )
                 }
 
             }
@@ -310,13 +337,12 @@ fun ImageSlider(
                 .background(Color.Transparent)
         ) { page ->
 
-            val painter = rememberImagePainter(
-                images[page],
-                builder = {
+            val painter = rememberAsyncImagePainter(
+                ImageRequest.Builder(LocalContext.current).data(images[page]).apply(block = fun ImageRequest.Builder.() {
                     crossfade(true)
                     placeholder(R.drawable.placeholder_ditto)
                     error(R.drawable.error_unown)
-                }
+                }).build()
             )
 
             Image(
@@ -426,13 +452,9 @@ fun BasicInfo(
     Column (
         modifier = Modifier
             .background(Color.Transparent)
+            .padding(horizontal = 8.dp)
             .fillMaxSize()
     ){
-        Text(
-            color = textColor,
-            modifier = Modifier.padding(12.dp),
-            text = "Descripción",
-        )
         Text(
             color = textColor,
             modifier = Modifier.padding(12.dp),
