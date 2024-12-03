@@ -1,8 +1,6 @@
 package com.example.pmdm_pokedex_composable.view
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,8 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,7 +31,8 @@ fun Estadisticas(
     spaAttack: String,
     spaDefence: String,
     speed: String,
-    total: String
+    total: String,
+    textColor: Color
 ) {
     // Convertimos las estadísticas a valores numéricos
     val stats = listOf(
@@ -64,7 +61,8 @@ fun Estadisticas(
         ) {
             Text(
                 text = "Estadísticas",
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = textColor
             )
 
 //            Row(
@@ -93,7 +91,7 @@ fun Estadisticas(
                             modifier = Modifier
                                 .padding(vertical = 4.dp),
                             textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onTertiary
+                            color = textColor
                         )
                     }
 
@@ -103,7 +101,7 @@ fun Estadisticas(
                         modifier = Modifier
                             .padding(vertical = 4.dp),
                         textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onTertiary
+                        color = textColor
                     )
                 }
 
@@ -120,7 +118,8 @@ fun Estadisticas(
                         text = total,
                         modifier = Modifier
                             .padding(vertical = 4.dp),
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        color = textColor
                     )
                 }
             }
@@ -153,22 +152,5 @@ fun ProgressBar(progress: Float, number: String) {
                 text = number,
             )
         }
-    }
-}
-
-
-@Preview
-@Composable
-fun PreviewEstadisticas(){
-    PMDM_Pokedex_ComposableTheme {
-        Estadisticas(
-            "45",
-            "49",
-            "49",
-            "65",
-            "65",
-            "40",
-            "305"
-        )
     }
 }

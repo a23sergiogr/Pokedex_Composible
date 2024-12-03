@@ -3,9 +3,7 @@ package com.example.pmdm_pokedex_composable.view
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -18,9 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import java.util.Locale
 
-
-
-private enum class TypeCards(val typeCard: @Composable () -> Unit) {
+private enum class PokemonTypeCards(val typeCard: @Composable () -> Unit) {
     NORMAL({ TypeCard(PokemonType.NORMAL, "Normal") }),
     FIRE({ TypeCard(PokemonType.FIRE, "Fire") }),
     WATER({ TypeCard(PokemonType.WATER, "Water") }),
@@ -45,10 +41,10 @@ private enum class TypeCards(val typeCard: @Composable () -> Unit) {
 fun getTypeCardSafe(typeName: String?): @Composable (() -> Unit) {
     return try {
         if (typeName != null) {
-            TypeCards.valueOf(typeName.uppercase(Locale.ROOT)).typeCard
-        } else TypeCards.LOADING.typeCard
+            PokemonTypeCards.valueOf(typeName.uppercase(Locale.ROOT)).typeCard
+        } else PokemonTypeCards.LOADING.typeCard
     } catch (e: IllegalArgumentException) {
-        TypeCards.LOADING.typeCard
+        PokemonTypeCards.LOADING.typeCard
     }
 }
 
@@ -89,7 +85,7 @@ private fun TypeCard(baseColor: PokemonType, type: String) {
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = type,
+                text = type.uppercase(Locale.ROOT),
                 color = darkenColor(Color(baseColor.color.value), 0.2f),
                 textAlign = TextAlign.Center,
             )

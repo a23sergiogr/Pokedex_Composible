@@ -39,6 +39,9 @@ import com.example.pmdm_pokedex_composable.model.data_classes.Pokemon
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.platform.LocalContext
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.example.pmdm_pokedex_composable.controler.NavControllerManager
 import com.example.pmdm_pokedex_composable.controler.PokemonDataController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -146,14 +149,11 @@ fun PokedexCard(
     val image = pokemon.value?.sprites?.normalSprites?.get(0) ?: ""
 
 
-    val painter = rememberImagePainter(
-        image,
-        builder = {
+    val painter =  rememberAsyncImagePainter(ImageRequest.Builder(LocalContext.current).data(image).apply(block = fun ImageRequest.Builder.() {
             crossfade(true)
             placeholder(R.drawable.placeholder_ditto)
             error(R.drawable.error_unown)
-        }
-    )
+        }).build())
 
     ElevatedCard(
         onClick = {

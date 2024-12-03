@@ -9,6 +9,8 @@ import com.example.pmdm_pokedex_composable.model.deserializers.GsonDeserializerP
 import com.example.pmdm_pokedex_composable.model.deserializers.GsonDeserializerPokemon
 import com.example.pmdm_pokedex_composable.model.deserializers.GsonDeserializerSpecies
 import com.example.pmdm_pokedex_composable.model.deserializers.GsonDeserializerSprites
+import com.example.pmdm_pokedex_composable.model.deserializers.GsonDeserializerStats
+import com.example.pmdm_pokedex_composable.model.deserializers.GsonDeserializerType
 import com.google.gson.GsonBuilder
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -45,6 +47,9 @@ interface PokeApiService {
 
     @GET("move?limit=1200")
     suspend fun getMovesList(): MoveListResponse
+
+    @GET("type/{id}")
+    suspend fun getRelationType(@Path("id") id: String): TypeRelations.Type
 }
 
 val retrofit = Retrofit.Builder()
@@ -60,6 +65,8 @@ val retrofit = Retrofit.Builder()
                 .registerTypeAdapter(Move::class.java, GsonDeserializerMove())
                 .registerTypeAdapter(NamedURLs::class.java, GsonDeserializerNamedURL())
                 .registerTypeAdapter(MoveListResponse::class.java, GsonDeserializerMoveListResponse())
+                .registerTypeAdapter(Stat::class.java, GsonDeserializerStats())
+                .registerTypeAdapter(TypeRelations.Type::class.java, GsonDeserializerType())
                 .create()
         )
     ).build()
