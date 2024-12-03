@@ -84,7 +84,6 @@ fun PokemonView(
     LaunchedEffect(pokemonId) {
         try {
             loading.value = true
-            // Simula la llamada para obtener los datos del Pokémon
             pokemon.value = pokemonId?.let { pokemonDataController.getPokemon(it) }
             specie.value = pokemonId?.let { pokemonDataController.getSpecies(it) }
 
@@ -176,7 +175,7 @@ fun PokemonView(
                         textColor = textColor,
                     )
                 },
-                {PokemonMovesView()},
+                {PokemonMovesView(pokemon.value?.moves ?: listOf(NamedURLs("tackle", "tackle")))},
                 {
                     Estadisticas(
                         "45",

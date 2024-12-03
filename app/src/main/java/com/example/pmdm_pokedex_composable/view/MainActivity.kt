@@ -107,13 +107,11 @@ fun MainPanel() {
                     composable("Pokedex") {
                         Pokedex(
                             drawerState = drawerState,
-                            pokemonDataController =  pokemonDataController
                         )
                     }
                     composable("MoveDex") {
                         MoveDex(
-                            drawerState = drawerState,
-                            pokemonDataController =  pokemonDataController
+                            drawerState = drawerState
                         )
                     }
                     composable(
@@ -222,11 +220,9 @@ fun SearchBarPokemon(
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var isSearchBarActive by rememberSaveable { mutableStateOf(false) }
 
-    // Filtrar los resultados según el texto de búsqueda
     val filteredList = list.filter { it.name.contains(searchQuery, ignoreCase = true) }
 
     Box(Modifier.fillMaxSize()) {
-        // Barra de búsqueda
         SearchBar(
             query = searchQuery,
             onQueryChange = { searchQuery = it },
@@ -241,10 +237,8 @@ fun SearchBarPokemon(
                 .fillMaxWidth()
         ) {
 
-            // LazyColumn dentro de SearchBar
             LazyColumn {
                 items(filteredList) { item ->
-                    // Llamar a la función composable 'card' pasando cada 'item' de la lista
                     card(item)
                 }
             }
@@ -262,11 +256,9 @@ fun SearchBarMoves(
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var isSearchBarActive by rememberSaveable { mutableStateOf(false) }
 
-    // Filtrar los resultados según el texto de búsqueda
     val filteredList = list.filter { it.contains(searchQuery, ignoreCase = true) }
 
     Box(Modifier.fillMaxSize()) {
-        // Barra de búsqueda
         SearchBar(
             query = searchQuery,
             onQueryChange = { searchQuery = it },
@@ -281,10 +273,8 @@ fun SearchBarMoves(
                 .fillMaxWidth()
         ) {
 
-            // LazyColumn dentro de SearchBar
             LazyColumn {
                 items(filteredList) { item ->
-                    // Llamar a la función composable 'card' pasando cada 'item' de la lista
                     card(item)
                 }
             }

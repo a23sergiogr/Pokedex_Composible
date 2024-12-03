@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import com.example.pmdm_pokedex_composable.controler.PokemonDataController
 import com.example.pmdm_pokedex_composable.model.data_classes.Move
 import com.example.pmdm_pokedex_composable.model.data_classes.pokeApiService
+import com.example.pmdm_pokedex_composable.model.data_classes.urlclasses.NamedURLs
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -43,19 +44,22 @@ import java.util.Locale
 @Composable
 fun MoveDex(
     drawerState: DrawerState,
-    pokemonDataController: PokemonDataController
 ) {
-    val movesList = remember { mutableStateListOf<String>() }
+    val pokemonDataController = PokemonDataController.getInstance()
+
+    val movesList = remember { mutableStateListOf<NamedURLs>() }
     val loading = remember { mutableStateOf(true) }
-    val selectedMove = remember { mutableStateOf<String?>(null) }
+    val selectedMove = remember { mutableStateOf<NamedURLs?>(null) }
     val scaffoldState = rememberBottomSheetScaffoldState()
     val coroutineScope = rememberCoroutineScope()
+    val moveNames = remember { mutableStateListOf<String>() }
 
     LaunchedEffect(Unit) {
         try {
             loading.value = false
             val moveDex = pokemonDataController.getMovesList()
-            movesList.addAll(moveDex.map { it.name })
+            movesList.addAll(moveDex.map { it })
+            moveNames.addAll(moveDex.map { it.name })
             loading.value = true
         } catch (e: Exception) {
             loading.value = false
@@ -66,10 +70,9 @@ fun MoveDex(
         scaffoldState = scaffoldState,
         sheetPeekHeight = 0.dp,
         sheetContent = {
-            selectedMove.value?.let { moveName ->
+            selectedMove.value?.let { movesList ->
                 MoveDetails(
-                    moveName = moveName,
-                    pokemonDataController = pokemonDataController
+                    moveName = movesList.name,
                 )
             }
         },
@@ -90,17 +93,20 @@ fun MoveDex(
         ) { contentPadding ->
             Box(modifier = Modifier.padding(contentPadding)) {
                 SearchBarMoves(
-                    list = movesList,
+                    list = moveNames,
                     card = { moveName ->
-                        MoveCard(
-                            name = moveName,
-                            onClick = {
-                                coroutineScope.launch {
-                                    selectedMove.value = moveName
-                                    scaffoldState.bottomSheetState.expand()
+                        val namedUrl = movesList.find { it.name == moveName }
+                        if (namedUrl != null) {
+                            MoveCard(
+                                namedURLs = namedUrl,
+                                onClick = {
+                                    coroutineScope.launch {
+                                        selectedMove.value = namedUrl
+                                        scaffoldState.bottomSheetState.expand()
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
                 )
             }
@@ -110,7 +116,7 @@ fun MoveDex(
 
 @Composable
 fun MoveCard(
-    name: String,
+    namedURLs: NamedURLs,
     onClick: () -> Unit) {
 
 
@@ -119,12 +125,12 @@ fun MoveCard(
     val pokemonDataController = PokemonDataController.getInstance(pokeApiService)
 
     // Llamada asíncrona
-    LaunchedEffect(name) {
+    LaunchedEffect(namedURLs.url) {
         try {
             loading.value = true
 
             // Simula la llamada para obtener los datos del Pokémon
-            move.value = pokemonDataController.getMove(name)
+            move.value = pokemonDataController.getMove(namedURLs.url)
 
             loading.value = false
         } catch (e: Exception) {
@@ -132,13 +138,14 @@ fun MoveCard(
         }
     }
 
-    val power = move.value?.power
-    val accuracy = move.value?.accuracy
-    val pp = move.value?.pp
-    val type = move.value?.type
 
-    val damageClass = move.value?.damageClass
-    val typeColor = type?.let { PokemonType.fromName(it) }
+    val power = move.value?.power ?: "N/A"
+    val accuracy = move.value?.accuracy ?: "N/A"
+    val pp = move.value?.pp ?: "N/A"
+    val type = move.value?.type ?: "unknown"
+
+    val damageClass = move.value?.damageClass  ?: "unknown"
+    val typeColor = type.let { PokemonType.fromName(it) }
     val typeCard = getTypeCardSafe(type)
 
 
@@ -177,7 +184,7 @@ fun MoveCard(
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
                         Text(
-                            text = name.replaceFirstChar { it.uppercase(Locale.getDefault()) },
+                            text = namedURLs.name.replaceFirstChar { it.uppercase(Locale.getDefault()) },
                             color = darkenColor(typeColor?.color ?: PokemonType.NORMAL.color, 0.6f)
                         )
                         Text(
@@ -228,8 +235,9 @@ fun MoveCard(
 @Composable
 fun MoveDetails(
     moveName: String,
-    pokemonDataController: PokemonDataController
 ) {
+    val pokemonDataController = PokemonDataController.getInstance()
+
     val move = remember { mutableStateOf<Move?>(null) }
     val loading = remember { mutableStateOf(true) }
 
@@ -247,14 +255,15 @@ fun MoveDetails(
         CircularProgressIndicator(modifier = Modifier.padding(16.dp))
     } else {
 
-        val power = move.value?.power
-        val accuracy = move.value?.accuracy
-        val pp = move.value?.pp
-        val flavorText = move.value?.flavorText
-        val effect = move.value?.shortEffect
-        val type = move.value?.type
+        val power = move.value?.power ?: "N/A"
+        val accuracy = move.value?.accuracy ?: "N/A"
+        val pp = move.value?.pp ?: "N/A"
+        val type = move.value?.type ?: "unknown"
 
-        val damageClass = move.value?.damageClass
+        val flavorText = move.value?.flavorText ?: "unknown"
+        val effect = move.value?.shortEffect ?: "unknown"
+
+        val damageClass = move.value?.damageClass ?: "unknown"
         val typeColor = type?.let { PokemonType.fromName(it) }
         val typeCard = getTypeCardSafe(type)
 
@@ -263,14 +272,14 @@ fun MoveDetails(
                 typeColor = typeColor?.color ?: Color.Red,
                 moveColor = 0xFF,
                 name = moveName,
-                type = damageClass ?: "null",
+                type = damageClass,
                 typeCard = typeCard,
                 power = power.toString(),
                 accuracy = accuracy.toString(),
                 pp = pp.toString(),
                 priority = move.value?.priority.toString(),
-                flavorText = flavorText ?: "null",
-                effect = effect ?: "null"
+                flavorText = flavorText,
+                effect = effect
             )
         }
     }

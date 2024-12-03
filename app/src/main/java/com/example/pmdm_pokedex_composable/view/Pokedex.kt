@@ -48,8 +48,9 @@ import java.util.Locale
 @Composable
 fun Pokedex(
     drawerState: DrawerState,
-    pokemonDataController: PokemonDataController
 ) {
+    val pokemonDataController = PokemonDataController.getInstance()
+
     setUIColors(darkenColor(MaterialTheme.colorScheme.primary, 0.2f))
 
     val pokemonList = remember { mutableStateListOf<PokemonCardData>() }
@@ -98,7 +99,6 @@ fun Pokedex(
                 card = { pokemon ->
                     PokedexCard(
                         pokemonCardData = pokemon,
-                        pokemonDataController = pokemonDataController,
                     )
                 }
             )
@@ -109,8 +109,8 @@ fun Pokedex(
 @Composable
 fun PokedexCard(
     pokemonCardData: PokemonCardData,
-    pokemonDataController: PokemonDataController,
 ) {
+    val pokemonDataController = PokemonDataController.getInstance()
 
     val navController = NavControllerManager.getNavController()
 

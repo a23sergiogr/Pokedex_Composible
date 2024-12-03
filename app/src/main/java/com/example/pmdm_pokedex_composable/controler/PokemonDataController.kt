@@ -11,6 +11,7 @@ import com.example.pmdm_pokedex_composable.model.data_classes.urlclasses.NamedUR
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+//Cambiar a Object
 class PokemonDataController private constructor(private val pokeApiService: PokeApiService) {
 
     companion object {
@@ -18,13 +19,27 @@ class PokemonDataController private constructor(private val pokeApiService: Poke
         @Volatile
         private var INSTANCE: PokemonDataController? = null
 
+        // Variable para almacenar el servicio API
+        @Volatile
+        private var storedPokeApiService: PokeApiService? = null
+
         // Método para obtener la instancia única
-        fun getInstance(pokeApiService: PokeApiService): PokemonDataController {
+        fun getInstance(pokeApiService: PokeApiService? = null): PokemonDataController {
             return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: PokemonDataController(pokeApiService).also { INSTANCE = it }
+                // Si no hay instancia, verifica si ya se almacenó el servicio API
+                val service = storedPokeApiService ?: pokeApiService
+                ?: throw IllegalArgumentException("PokeApiService must be provided the first time")
+                // Guarda el servicio si es la primera vez
+                if (storedPokeApiService == null) {
+                    storedPokeApiService = service
+                }
+                // Crea la instancia con el servicio disponible
+                INSTANCE ?: PokemonDataController(service).also { INSTANCE = it }
             }
         }
     }
+
+    val BASE_URL = "https://pokeapi.co/api/v2/"
 
     // Funciónes suspendidas que obtienen datos de la API
     suspend fun getPokedex(): Pokedex {
@@ -52,8 +67,15 @@ class PokemonDataController private constructor(private val pokeApiService: Poke
     }
 
     suspend fun getMove(name: String): Move{
-        return pokeApiService.getMove(name)
+        return if (name.contains(BASE_URL + "move/")){
+            val str = name.substringAfter(BASE_URL + "move/")
+            pokeApiService.getMove(str)
+        }
+        else
+            pokeApiService.getMove(name)
     }
+
+
 
     private fun extractIdFromUrl(url: String): String {
         val regex = """evolution-chain/(\d+)""".toRegex()
