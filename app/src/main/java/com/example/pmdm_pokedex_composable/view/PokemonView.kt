@@ -122,7 +122,7 @@ fun PokemonView(
         }
     }
 
-// Cargo datos de los pokemons
+    // Cargo datos de los pokemons
     val types = pokemon.value?.types
     val typeOne = if (!types.isNullOrEmpty() && types.isNotEmpty()) types[0].name else null
     val typeTwo = if (!types.isNullOrEmpty() && types.size > 1) types[1].name else null
@@ -237,7 +237,7 @@ fun TopView(
                             .padding(end = 2.dp),
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center,
-                        color = textColor // Usar color secundario del tema para el ID
+                        color = textColor
                     )
                 }
 
@@ -248,10 +248,24 @@ fun TopView(
                     horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Imágenes de los tipos
 
-                    typeOneCard.invoke()
-                    typeTwoCard.invoke()
+                    // Imágenes de los tipos
+                    Box(
+                        modifier = Modifier
+                            .width(75.dp)
+                            .height(30.dp)
+                            .align(Alignment.CenterVertically)
+                    ){
+                        typeOneCard.invoke()
+                    }
+                    Box(
+                        modifier = Modifier
+                            .width(75.dp)
+                            .height(30.dp)
+                            .align(Alignment.CenterVertically)
+                    ){
+                        typeTwoCard.invoke()
+                    }
 
                     Spacer(modifier = Modifier.weight(1f))
 

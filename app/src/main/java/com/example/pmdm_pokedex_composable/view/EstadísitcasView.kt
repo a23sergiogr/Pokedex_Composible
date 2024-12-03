@@ -92,7 +92,8 @@ fun Estadisticas(
                             text = text,
                             modifier = Modifier
                                 .padding(vertical = 4.dp),
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onTertiary
                         )
                     }
 
@@ -101,7 +102,8 @@ fun Estadisticas(
                         text = "Total",
                         modifier = Modifier
                             .padding(vertical = 4.dp),
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onTertiary
                     )
                 }
 
@@ -127,32 +129,6 @@ fun Estadisticas(
 }
 
 @Composable
-fun EstadisticasCard(text: String, onClick: () -> Unit) {
-    ElevatedCard(
-        modifier = Modifier
-            .width(80.dp)
-            .border(
-                width = 2.dp,
-                color = MaterialTheme.colorScheme.secondary,
-                shape = RoundedCornerShape(8.dp)
-            )
-            .clickable { onClick() },
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = lightenColor(MaterialTheme.colorScheme.secondary, 0.4f)
-        ),
-    ) {
-        Text(
-            text = text,
-            modifier = Modifier
-                .padding(4.dp)
-                .fillMaxWidth(),
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSecondary
-        )
-    }
-}
-
-@Composable
 fun ProgressBar(progress: Float, number: String) {
     Box(
         modifier = Modifier
@@ -160,13 +136,13 @@ fun ProgressBar(progress: Float, number: String) {
             .padding(start = 26.dp)
             .height(20.dp)
             .width(150.dp)
-            .background(MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(16.dp)) // Fondo de la barra
+            .background(MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(16.dp)) // Fondo de la barra
     ) {
         Box(
             modifier = Modifier
                 .height(20.dp)
                 .width((150 * progress).dp)
-                .background(MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(16.dp)) // Progreso
+                .background(MaterialTheme.colorScheme.tertiary, shape = RoundedCornerShape(16.dp)) // Progreso
         ) {
 
             Text(

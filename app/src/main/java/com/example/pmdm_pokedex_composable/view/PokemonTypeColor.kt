@@ -20,7 +20,12 @@ enum class PokemonType(val color: Color) {
     DRAGON(Color(0xFF7038F8)),    // Color para el tipo DRAGÓN
     DARK(Color(0xFF705848)),      // Color para el tipo SINIESTRO
     STEEL(Color(0xFFB8B8D0)),     // Color para el tipo ACERO
-    FAIRY(Color(0xFFF0A0F0));     // Color para el tipo HADA
+    FAIRY(Color(0xFFF0A0F0)),     // Color para el tipo HADA
+
+
+    PHYSICAL(Color(0xFFC62828)),  // Rojo vibrante
+    SPECIAL(Color(0xFF1565C0)),   // Azul vibrante
+    STATUS(Color(0xFF2E7D32));    // Verde vibrante
 
     companion object {
         fun fromName(name: String): PokemonType? {

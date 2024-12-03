@@ -50,7 +50,6 @@ fun Pokedex(
     drawerState: DrawerState,
 ) {
     val pokemonDataController = PokemonDataController.getInstance()
-
     setUIColors(darkenColor(MaterialTheme.colorScheme.primary, 0.2f))
 
     val pokemonList = remember { mutableStateListOf<PokemonCardData>() }
@@ -219,8 +218,24 @@ fun PokedexCard(
                     horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    typeOneCard.invoke()
-                    typeTwoCard.invoke()
+                    Box(
+                        modifier = Modifier
+                            .width(75.dp)
+                            .height(30.dp)
+                            .padding(end = 4.dp)
+                            .align(Alignment.CenterVertically)
+                    ){
+                        typeOneCard.invoke()
+                    }
+                    Box(
+                        modifier = Modifier
+                            .width(75.dp)
+                            .height(30.dp)
+                            .padding(end = 4.dp)
+                            .align(Alignment.CenterVertically)
+                    ){
+                        typeTwoCard.invoke()
+                    }
                 }
             }
 

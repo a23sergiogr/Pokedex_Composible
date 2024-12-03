@@ -53,11 +53,13 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.pmdm_pokedex_composable.controler.NavControllerManager
 import com.example.pmdm_pokedex_composable.controler.PokemonDataController
 import com.example.pmdm_pokedex_composable.model.data_classes.pokeApiService
+import com.example.pmdm_pokedex_composable.ui.theme.SettingsViewModel
 
 
 class MainActivity : ComponentActivity() {
@@ -65,23 +67,25 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            PMDM_Pokedex_ComposableTheme(dynamicColor = false) {
-                MainPanel()
+            // Obtén el ViewModel a nivel de la actividad
+            val settingsViewModel: SettingsViewModel = viewModel()
+
+            PMDM_Pokedex_ComposableTheme(
+                dynamicColor = false,
+                themeType = settingsViewModel.selectedTheme
+            ) {
+
+                MainPanel(settingsViewModel = settingsViewModel)
             }
         }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    PMDM_Pokedex_ComposableTheme {
-        MainPanel()
-    }
-}
 
 @Composable
-fun MainPanel() {
+fun MainPanel(
+    settingsViewModel: SettingsViewModel
+) {
     setUIColors(darkenColor(MaterialTheme.colorScheme.primary, 0.2f))
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -113,6 +117,9 @@ fun MainPanel() {
                         MoveDex(
                             drawerState = drawerState
                         )
+                    }
+                    composable("Settings"){
+                        SettingsScreen(settingsViewModel)
                     }
                     composable(
                         route = "PokemonView/{pokemonId}",
@@ -197,6 +204,7 @@ fun LateralMenu(
                     label = { Text(text = "Settings", color = colors.onSurface) },
                     selected = false,
                     onClick = {
+                        navController.navigate("Settings")
                         coroutineScope.launch { drawerState.close() }
                     },
                     modifier = Modifier

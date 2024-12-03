@@ -6,7 +6,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,7 +29,7 @@ fun Moves(
     typeColor: Color,
     moveColor: Long,
     name: String,
-    type: String,
+    damageCard: @Composable () -> Unit,
     typeCard: @Composable () -> Unit,
     power: String,
     accuracy: String,
@@ -86,14 +89,46 @@ fun Moves(
                         .padding(bottom = 12.dp)
 
                 ){
-                    typeCard.invoke()
+                    Row(
+                        modifier = Modifier
+                            .width(130.dp)
+                            .height(30.dp)
+                            .align(Alignment.CenterVertically)
+                            .background(
+                                color = darkenColor(typeColor, 0.6f),
+                                shape = RoundedCornerShape(12.dp) // Bordes redondeados para un mejor aspecto
+                            ),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .width(45.dp)
+                                .padding(start = 4.dp), // Pequeño espacio interno
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Type: ",
+                                color = Color.White // Texto claro para mayor contraste
+                            )
+                        }
 
-                    when(type){
-                        "physical"-> PhysicalCard()
-                        "special"-> SpecialCard()
-                        "status"-> StatusCard()
+                        Box(
+                            modifier = Modifier
+                                .width(75.dp),
+                        ) {
+                            typeCard.invoke() // Invoca la tarjeta del tipo correspondiente
+                        }
                     }
 
+                    Box(
+                        modifier = Modifier
+                            .width(75.dp)
+                            .height(30.dp)
+                            .align(Alignment.CenterVertically)
+                    ){
+                        damageCard.invoke()
+                    }
                 }
                 Row (
                     horizontalArrangement = Arrangement.SpaceAround,

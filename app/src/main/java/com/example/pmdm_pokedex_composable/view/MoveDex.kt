@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
@@ -46,6 +48,7 @@ fun MoveDex(
     drawerState: DrawerState,
 ) {
     val pokemonDataController = PokemonDataController.getInstance()
+    setUIColors(darkenColor(MaterialTheme.colorScheme.primary, 0.2f))
 
     val movesList = remember { mutableStateListOf<NamedURLs>() }
     val loading = remember { mutableStateOf(true) }
@@ -129,7 +132,6 @@ fun MoveCard(
         try {
             loading.value = true
 
-            // Simula la llamada para obtener los datos del Pokémon
             move.value = pokemonDataController.getMove(namedURLs.url)
 
             loading.value = false
@@ -147,15 +149,15 @@ fun MoveCard(
     val damageClass = move.value?.damageClass  ?: "unknown"
     val typeColor = type.let { PokemonType.fromName(it) }
     val typeCard = getTypeCardSafe(type)
+    val damageCard = getDamageCardSafe(damageClass)
 
 
     ElevatedCard(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.background)
             .padding(vertical = 8.dp, horizontal = 4.dp)
             .border(
                 width = 2.dp,
-                color = typeColor?.color ?: PokemonType.NORMAL.color,
+                color = MaterialTheme.colorScheme.secondary,
                 shape = RoundedCornerShape(8.dp)
             ),
         onClick = {
@@ -169,47 +171,36 @@ fun MoveCard(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(lightenColor(typeColor?.color ?: PokemonType.NORMAL.color, 0.5f))
+                    .background(MaterialTheme.colorScheme.primary)
             ) {
-                Column(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Text(
-                            text = namedURLs.name.replaceFirstChar { it.uppercase(Locale.getDefault()) },
-                            color = darkenColor(typeColor?.color ?: PokemonType.NORMAL.color, 0.6f)
-                        )
-                        Text(
-                            text = "Power: $power",
-                            color = darkenColor(typeColor?.color ?: PokemonType.NORMAL.color, 0.6f)
-                        )
-                    }
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Text(
-                            text = "Accuracy: $accuracy",
-                            color = darkenColor(typeColor?.color ?: PokemonType.NORMAL.color, 0.6f)
-                        )
-
-                        Text(
-                            text = "PP: $pp",
-                            color = darkenColor(typeColor?.color ?: PokemonType.NORMAL.color, 0.6f)
-                        )
-                    }
+                    Text(
+                        text = namedURLs.name.replaceFirstChar { it.uppercase(Locale.getDefault()) },
+                        color = MaterialTheme.colorScheme.onPrimary,
+                    )
+                    Text(
+                        text = "$power",
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                    Text(
+                        text = "$accuracy",
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                    Text(
+                        text = "$pp",
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
                 }
+
             }
         }
 
@@ -220,13 +211,45 @@ fun MoveCard(
                 .padding(horizontal = 12.dp, vertical = 16.dp)
                 .fillMaxWidth()
         ) {
+            Row(
+                modifier = Modifier
+                    .width(130.dp)
+                    .height(30.dp)
+                    .align(Alignment.CenterVertically)
+                    .background(
+                        color = darkenColor(typeColor?.color ?: Color.Transparent, 0.6f),
+                        shape = RoundedCornerShape(12.dp) // Bordes redondeados para un mejor aspecto
+                    ),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Box(
+                    modifier = Modifier
+                        .width(45.dp)
+                        .padding(start = 4.dp), // Pequeño espacio interno
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Type: ",
+                        color = Color.White // Texto claro para mayor contraste
+                    )
+                }
 
-            typeCard.invoke()
+                Box(
+                    modifier = Modifier
+                        .width(75.dp),
+                ) {
+                    typeCard.invoke() // Invoca la tarjeta del tipo correspondiente
+                }
+            }
 
-            when(damageClass){
-                "physical"-> PhysicalCard()
-                "special"-> SpecialCard()
-                "status"-> StatusCard()
+            Box(
+                modifier = Modifier
+                    .width(75.dp)
+                    .height(30.dp)
+                    .align(Alignment.CenterVertically)
+            ){
+                damageCard.invoke()
             }
         }
     }
@@ -264,6 +287,8 @@ fun MoveDetails(
         val effect = move.value?.shortEffect ?: "unknown"
 
         val damageClass = move.value?.damageClass ?: "unknown"
+        val damageCard = getDamageCardSafe(damageClass)
+
         val typeColor = type?.let { PokemonType.fromName(it) }
         val typeCard = getTypeCardSafe(type)
 
@@ -272,7 +297,7 @@ fun MoveDetails(
                 typeColor = typeColor?.color ?: Color.Red,
                 moveColor = 0xFF,
                 name = moveName,
-                type = damageClass,
+                damageCard = damageCard,
                 typeCard = typeCard,
                 power = power.toString(),
                 accuracy = accuracy.toString(),
