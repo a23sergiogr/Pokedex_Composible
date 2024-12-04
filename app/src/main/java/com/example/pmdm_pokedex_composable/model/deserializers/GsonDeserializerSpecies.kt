@@ -53,7 +53,7 @@ class GsonDeserializerSpecies: JsonDeserializer<Species> {
         for (element in flavorArray) {
             val entry = element.asJsonObject
             val language = entry.getAsJsonObject("language")?.get("name")?.asString
-            if (language == "es") {
+            if (language == "en") {
                 texts.add(entry.get("flavor_text")?.asString ?: "")
             }
         }
