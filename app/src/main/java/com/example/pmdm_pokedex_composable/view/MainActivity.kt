@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -149,18 +150,19 @@ fun LateralMenu(
 
     ModalNavigationDrawer(
         drawerState = drawerState,
+        modifier = Modifier.background(Color.Transparent),
         drawerContent = {
             ModalDrawerSheet(
                 modifier = Modifier
                     .fillMaxWidth(0.75f)
-                    .background(colors.background)
+                    .background(Color.Transparent)
             ) {
 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(150.dp)
-                        .background(colors.primary)
+                        .background(Color.Transparent)
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.drawer_image),
@@ -170,48 +172,54 @@ fun LateralMenu(
                         contentScale = ContentScale.Crop
                     )
                 }
-                HorizontalDivider(color = colors.surface, thickness = 1.dp)
+                Column(
+                    modifier = Modifier
+                        .background(colors.surface)
+                        .fillMaxSize()
+                ) {
+                    HorizontalDivider(color = colors.outline, thickness = 1.dp)
 
-                NavigationDrawerItem(
-                    label = { Text(text = "Pokedex", color = colors.onSurface) },
-                    selected = false,
-                    onClick = {
-                        navController.navigate("Pokedex")
-                        coroutineScope.launch { drawerState.close() }
-                    },
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                        .background(colors.surface.copy(alpha = 0.1f))
-                        .padding(8.dp)
-                )
-                NavigationDrawerItem(
-                    label = { Text(text = "MoveDex", color = colors.onSurface) },
-                    selected = false,
-                    onClick = {
-                        navController.navigate("MoveDex")
-                        coroutineScope.launch { drawerState.close() }
-                    },
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                        .background(colors.surface.copy(alpha = 0.1f))
-                        .padding(8.dp)
-                )
-                HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    color = colors.outline
-                )
-                NavigationDrawerItem(
-                    label = { Text(text = "Settings", color = colors.onSurface) },
-                    selected = false,
-                    onClick = {
-                        navController.navigate("Settings")
-                        coroutineScope.launch { drawerState.close() }
-                    },
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                        .background(colors.surface.copy(alpha = 0.1f))
-                        .padding(8.dp)
-                )
+                    NavigationDrawerItem(
+                        label = { Text(text = "Pokedex", color = colors.onSurface) },
+                        selected = false,
+                        onClick = {
+                            navController.navigate("Pokedex")
+                            coroutineScope.launch { drawerState.close() }
+                        },
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .background(colors.onSurface.copy(alpha = 0.1f))
+                            .padding(8.dp)
+                    )
+                    NavigationDrawerItem(
+                        label = { Text(text = "MoveDex", color = colors.onSurface) },
+                        selected = false,
+                        onClick = {
+                            navController.navigate("MoveDex")
+                            coroutineScope.launch { drawerState.close() }
+                        },
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .background(colors.onSurface.copy(alpha = 0.1f))
+                            .padding(8.dp)
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        color = colors.outline
+                    )
+                    NavigationDrawerItem(
+                        label = { Text(text = "Settings", color = colors.onSurface) },
+                        selected = false,
+                        onClick = {
+                            navController.navigate("Settings")
+                            coroutineScope.launch { drawerState.close() }
+                        },
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .background(colors.onSurface.copy(alpha = 0.1f))
+                            .padding(8.dp)
+                    )
+                }
             }
         }
     ) {

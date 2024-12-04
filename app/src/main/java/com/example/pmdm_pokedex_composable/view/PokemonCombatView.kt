@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -237,18 +238,19 @@ fun DisplayDamageEffectiveness(typeNames: List<String>) {
 @Composable
 fun PokemonMoveList(
     movesList: List<NamedURLs>,
+    color: Color
     ){
     val rememberedMoves = remember { movesList }
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(400.dp)
+            .height(350.dp)
             .padding(24.dp)
             .border(
                 width = 2.dp,
-                color = MaterialTheme.colorScheme.secondary,
-                shape = RectangleShape
+                color = color,
+                shape = RoundedCornerShape(4.dp)
             )
     ) {
         if (rememberedMoves.isNotEmpty()) {

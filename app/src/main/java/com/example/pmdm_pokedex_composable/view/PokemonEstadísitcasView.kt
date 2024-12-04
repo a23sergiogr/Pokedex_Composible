@@ -81,7 +81,7 @@ fun Estadisticas(
             ) {
                 // Nombres de las estadísticas
                 Column(
-                    modifier = Modifier.padding(12.dp)
+                    modifier = Modifier.padding(horizontal = 12.dp)
                 ) {
                     listOf(
                         "PS", "Attack", "Defence", "Spa. Attack", "Spa. Defence", "Speed"

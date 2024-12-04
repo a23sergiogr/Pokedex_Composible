@@ -1,9 +1,11 @@
 package com.example.pmdm_pokedex_composable.view
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusModifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.unit.dp
 import com.example.pmdm_pokedex_composable.ui.theme.PMDM_Pokedex_ComposableTheme
@@ -27,10 +29,12 @@ fun SettingsScreen(settingsViewModel: SettingsViewModel = viewModel()) {
         themeType = selectedTheme,
         dynamicColor = false,
     ) {
+
         // UI de selección de tema
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

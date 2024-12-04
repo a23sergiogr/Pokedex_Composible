@@ -86,11 +86,6 @@ fun MoveDex(
                 TopBar(
                     drawerState = drawerState,
                     title = "MoveDex",
-                    actions = {
-                        IconButton(onClick = { /* Acción de filtrar */ }) {
-                            Icon(Icons.Filled.FilterList, contentDescription = "Filter")
-                        }
-                    }
                 )
             },
         ) { contentPadding ->
@@ -157,7 +152,7 @@ fun MoveCard(
             .padding(vertical = 8.dp, horizontal = 4.dp)
             .border(
                 width = 2.dp,
-                color = MaterialTheme.colorScheme.secondary,
+                color = MaterialTheme.colorScheme.primary,
                 shape = RoundedCornerShape(8.dp)
             ),
         onClick = {

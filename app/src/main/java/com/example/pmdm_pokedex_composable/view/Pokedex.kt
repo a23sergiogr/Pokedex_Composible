@@ -44,7 +44,6 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.pmdm_pokedex_composable.controler.NavControllerManager
 import com.example.pmdm_pokedex_composable.controler.PokemonDataController
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import java.util.Locale
 
 
@@ -87,11 +86,6 @@ fun Pokedex(
             TopBar(
                 drawerState = drawerState,
                 title = "Pokedex",
-                actions = {
-                    IconButton(onClick = { /* Acción de filtrar */ }) {
-                        Icon(Icons.Filled.Add, contentDescription = "Add")
-                    }
-                }
             )
         },
     ) { innerPadding ->
@@ -205,11 +199,11 @@ fun PokedexCard(
                         textAlign = TextAlign.Center,
                         color = textColor // Usar color secundario del tema para el ID
                     )
-                    Image(
-                        painter = painterResource(R.drawable.stars_shiny),
-                        contentDescription = "stars",
-                        modifier = Modifier.width(24.dp)
-                    )
+//                    Image(
+//                        painter = painterResource(R.drawable.stars_shiny),
+//                        contentDescription = "stars",
+//                        modifier = Modifier.width(24.dp)
+//                    )
                 }
                 Row(
                     modifier = Modifier

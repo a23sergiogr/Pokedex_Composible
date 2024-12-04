@@ -151,7 +151,6 @@ fun PokemonView(
     Column (
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
             .background(
                 brush = Brush.linearGradient(
                     colors = listOf(
@@ -167,7 +166,8 @@ fun PokemonView(
             typeOneCard = typeOneCard,
             typeTwoCard = typeTwoCard,
             textColor = textColor,
-            pokemon = pokemon
+            pokemon = pokemon,
+            color = tranparentColor(complementaryOf(color), 0.1f)
         )
         InfoSlider(
             listOf(
@@ -178,6 +178,7 @@ fun PokemonView(
                         description = description,
                         evolutionImages.value,
                         textColor = textColor,
+                        complementaryColor = tranparentColor(complementaryOf(color), 0.4f)
                     )
                 },
                 {
@@ -200,6 +201,7 @@ fun PokemonView(
                 },
                 { PokemonMoveList(
                     movesList = pokemon.value?.moves ?: listOf(NamedURLs("tackle", "tackle")),
+                    color = tranparentColor(complementaryOf(color), 0.2f)
                     )
                 },
             ),
@@ -216,7 +218,8 @@ fun TopView(
     typeOneCard: @Composable () -> Unit,
     typeTwoCard: @Composable () -> Unit?,
     textColor: Color,
-    pokemon: MutableState<Pokemon?>
+    pokemon: MutableState<Pokemon?>,
+    color: Color,
 ) {
     Box(
         modifier = Modifier
@@ -292,8 +295,9 @@ fun TopView(
                             .align(Alignment.CenterVertically) // Asegura alineación vertical
                     ) {
                         PlaySoundButton(
-                            pokemon.value?.cries
-                                ?: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/legacy/132.ogg"
+                            audioUrl = pokemon.value?.cries
+                                ?: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/legacy/132.ogg",
+                            color = color,
                         )
                     }
 //                    Image(
@@ -447,29 +451,33 @@ fun BasicInfo(
     height: String,
     description: String,
     evolutions: List<Evolution>,
-    textColor: Color
+    textColor: Color,
+    complementaryColor: Color
     ){
     Column (
         modifier = Modifier
             .background(Color.Transparent)
             .padding(horizontal = 8.dp)
+            .verticalScroll(rememberScrollState())
             .fillMaxSize()
     ){
         Text(
             color = textColor,
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(horizontal = 12.dp),
             text = description
         )
         ElevatedCard (
             modifier = Modifier.padding(12.dp),
             colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.secondary
+                containerColor = complementaryColor
             )
         )
         {
-            Row {
+            Row(
+                modifier = Modifier.background(Color.Transparent)
+            ) {
                 Text(
-                    color = MaterialTheme.colorScheme.onSecondary,
+                    color = darkenColor(complementaryColor, 0.8f),
                     modifier = Modifier.padding(12.dp),
                     text = "Weight $weight"
                 )
@@ -477,6 +485,7 @@ fun BasicInfo(
                     painter = painterResource(R.drawable.weight),
                     contentDescription = "weight",
                     modifier = Modifier
+                        .background(Color.Transparent)
                         .padding(16.dp,12.dp)
                         .height(24.dp)
                 )
@@ -485,13 +494,13 @@ fun BasicInfo(
         ElevatedCard (
             modifier = Modifier.padding(12.dp),
             colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.secondary
+                containerColor = complementaryColor
             )
         )
         {
             Row {
                 Text(
-                    color = MaterialTheme.colorScheme.onSecondary,
+                    color = darkenColor(complementaryColor, 0.8f),
                     modifier = Modifier.padding(12.dp),
                     text = "Height $height"
                 )
@@ -509,7 +518,7 @@ fun BasicInfo(
                 .padding(12.dp)
                 .fillMaxWidth(),
             colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.secondary
+                containerColor = complementaryColor
             )
         ) {
             LazyRow(

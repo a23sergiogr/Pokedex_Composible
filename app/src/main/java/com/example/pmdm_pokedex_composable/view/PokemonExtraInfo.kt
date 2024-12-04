@@ -14,11 +14,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun PlaySoundButton(
-    audioUrl: String // URL del archivo OGG
+    audioUrl: String, // URL del archivo OGG
+    color: Color
 ) {
     val context = LocalContext.current
     val mediaPlayer = remember { MediaPlayer() }
@@ -32,10 +34,10 @@ fun PlaySoundButton(
 
         Button(
             colors = ButtonColors(
-                containerColor = MaterialTheme.colorScheme.secondary,
-                disabledContainerColor = darkenColor(MaterialTheme.colorScheme.secondary, 0.2f),
-                contentColor = MaterialTheme.colorScheme.onSecondary,
-                disabledContentColor = MaterialTheme.colorScheme.onSecondary
+                containerColor = color,
+                disabledContainerColor = darkenColor(color, 0.2f),
+                contentColor = darkenColor(color, 0.8f),
+                disabledContentColor = darkenColor(color, 0.8f)
             ),
             onClick = {
                 try {

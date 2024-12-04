@@ -1,6 +1,8 @@
 package com.example.pmdm_pokedex_composable.view
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.core.graphics.alpha
 
 enum class PokemonType(val color: Color) {
     NORMAL(Color(0xFFA8A878)),    // Color para el tipo NORMAL
@@ -95,4 +97,17 @@ fun tranparentColor(color: Color, factor: Float): Color {
     val alpha = color.alpha * (1f - factor)
 
     return Color(red, green, blue, alpha)
+}
+
+
+fun complementaryOf(color: Color): Color {
+    val red = (color.toArgb() shr 16) and 0xFF
+    val green = (color.toArgb() shr 8) and 0xFF
+    val blue = color.toArgb() and 0xFF
+
+    val complementRed = 255 - red
+    val complementGreen = 255 - green
+    val complementBlue = 255 - blue
+
+    return Color(complementRed, complementGreen, complementBlue, color.toArgb().alpha)
 }

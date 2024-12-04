@@ -273,7 +273,7 @@ fun PMDM_Pokedex_ComposableTheme(
             ThemeType.Flare -> {
                 if (isSystemInDarkTheme()) FlareThemeDark else FlareThemeLight
             }
-            else -> if (isSystemInDarkTheme())  LightColorScheme else DarkColorScheme
+            else -> if (isSystemInDarkTheme())  DarkColorScheme else LightColorScheme
         }
     }
 
